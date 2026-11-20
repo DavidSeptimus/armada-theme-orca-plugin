@@ -1,0 +1,22 @@
+{
+  "name": "armada-theme",
+  "displayName": "Armada for Orca",
+  "description": "A dark color theme inspired by the dark themes of JetBrains Fleet and Air.",
+  "version": "1.0.0",
+  "private": true,
+  "publisher": "davidseptimus",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DavidSeptimus/armada-theme-orca-plugin.git"
+  },
+  "engines": {
+    "orca": ">=1.4.245"
+  },
+  "scripts": {
+    "build": "node --experimental-strip-types scripts/build-theme.mjs",
+    "validate": "orca plugin validate .",
+    "screenshots": "node scripts/capture-screenshots.mjs",
+    "dev": "orca plugin dev load ."
+  }
+}
