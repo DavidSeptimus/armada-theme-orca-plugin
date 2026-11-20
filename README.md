@@ -27,10 +27,6 @@ npm run validate                         # orca plugin validate .
 
 The manifest's id, name, version and description come from `package.json`.
 
-To release, raise the version in `package.json`, build, commit, and run `npm run release` on
-`develop`. It commits the shipped files to `main`, with `README.main.md` as their `README.md`,
-validates them and tags the commit. It does not push.
-
 ### App colors
 
 Orca themes set about 70 CSS variables (`--background`, `--sidebar`, `--tab-active` and so on).
@@ -69,6 +65,39 @@ nothing in Orca's built-in highlighting.
 ### Terminal colors
 
 The theme's `terminal.*` workbench colors, under Orca's names for them.
+
+## Publishing
+
+On `develop`, with everything else committed:
+
+1. Raise `version` in `package.json`. Orca's directory keeps each listed version for good, so a
+   fix to a published version needs a new one.
+2. Rebuild, so the manifest gets the new version, and check it:
+
+   ```sh
+   npm run build
+   npm run validate
+   ```
+
+3. If the colors changed, run `npm run screenshots`.
+4. Commit.
+5. Cut the release:
+
+   ```sh
+   npm run release
+   ```
+
+   It commits the shipped files to `main`, with `README.main.md` as their `README.md`, validates
+   that commit with `orca plugin validate` and tags it `v<version>`. It does not push.
+6. Push the two branches and the tag. The script prints the command:
+
+   ```sh
+   git push origin develop main v<version>
+   ```
+
+Orca's directory finds the repository by its `orca-plugin` topic and looks for new version tags
+every 30 minutes. The listing and its status are at
+<https://orca.dev/plugins/DavidSeptimus/armada-theme-orca-plugin>.
 
 ## Screenshots
 
