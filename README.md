@@ -21,6 +21,10 @@ orca plugin install /path/to/armada-theme-orca-plugin
 
 ## How it is built
 
+The `main` branch holds only the files the plugin ships, because Orca's plugin directory reads
+every file at a version tag. The build described here, with `src/` and `scripts/`, is on the
+[`develop`](https://github.com/DavidSeptimus/armada-theme-orca-plugin/tree/develop) branch.
+
 Everything under `themes/` and `terminal/`, and `orca-plugin.json`, is generated. The source of
 truth for the colors is Tachi Code's Armada theme (`armada.ts`), which is also what the VS Code
 extension is built from. It provides the theme and its named palette. What is Orca's own lives in
@@ -32,6 +36,10 @@ npm run validate                         # orca plugin validate .
 ```
 
 The manifest's id, name, version and description come from `package.json`.
+
+To release, raise the version in `package.json`, build, commit, and run `npm run release` on
+`develop`. It commits the shipped files to `main`, validates them and tags the commit. It does
+not push.
 
 ### App colors
 
