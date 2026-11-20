@@ -1,29 +1,19 @@
 # Armada for Orca
 
-The Armada dark theme as an Orca plugin: an app theme, its code colors, and a terminal palette.
+The build for the Armada dark theme as an Orca plugin: an app theme, its code colors, and a
+terminal palette.
 
-Choose it under Settings → Appearance. Its terminal colors are offered alongside it.
+This is the `develop` branch. The `main` branch holds only the files the plugin ships, because
+Orca's plugin directory reads every file at a version tag. Its readme, for people who use the
+theme, is `README.main.md` here.
 
-![Armada in Orca: a TypeScript file above a terminal showing git status and the 16 terminal colors](screenshots/cover.png)
-
-More: [TypeScript](screenshots/typescript.png), [HTML](screenshots/html.png),
-[CSS](screenshots/css.png), [JSON](screenshots/json.png), [Python](screenshots/python.png),
-[Markdown](screenshots/markdown.png), [a diff](screenshots/diff.png),
-[the terminal](screenshots/terminal.png).
-
-## Install from this folder
+## Try it from this folder
 
 ```sh
-orca plugin install /path/to/armada-theme-orca-plugin
+npm run dev                              # orca plugin dev load .
 ```
 
-`orca plugin uninstall davidseptimus.armada-theme` removes it.
-
 ## How it is built
-
-The `main` branch holds only the files the plugin ships, because Orca's plugin directory reads
-every file at a version tag. The build described here, with `src/` and `scripts/`, is on the
-[`develop`](https://github.com/DavidSeptimus/armada-theme-orca-plugin/tree/develop) branch.
 
 Everything under `themes/` and `terminal/`, and `orca-plugin.json`, is generated. The source of
 truth for the colors is Tachi Code's Armada theme (`armada.ts`), which is also what the VS Code
@@ -38,8 +28,8 @@ npm run validate                         # orca plugin validate .
 The manifest's id, name, version and description come from `package.json`.
 
 To release, raise the version in `package.json`, build, commit, and run `npm run release` on
-`develop`. It commits the shipped files to `main`, validates them and tags the commit. It does
-not push.
+`develop`. It commits the shipped files to `main`, with `README.main.md` as their `README.md`,
+validates them and tags the commit. It does not push.
 
 ### App colors
 

@@ -7,7 +7,9 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-const SHIPPED = ['orca-plugin.json', 'themes', 'terminal', 'screenshots', 'README.md', 'LICENSE']
+const SHIPPED = ['orca-plugin.json', 'themes', 'terminal', 'screenshots', 'LICENSE']
+// The readme of the release branch is for people who use the theme. This branch's is about the build.
+const RELEASE_README = 'README.main.md'
 const SOURCE_BRANCH = 'develop'
 const RELEASE_BRANCH = 'main'
 
@@ -31,7 +33,9 @@ if (git(['tag', '--list', tag])) fail(`${tag} already exists. Raise the version 
 const work = mkdtempSync(join(tmpdir(), 'armada-release-'))
 try {
   const env = { ...process.env, GIT_INDEX_FILE: join(work, 'index') }
-  const entries = git(['ls-tree', '-r', 'HEAD', '--', ...SHIPPED])
+  const readme = git(['ls-tree', 'HEAD', '--', RELEASE_README]).replace(RELEASE_README, 'README.md')
+  if (!readme) fail(`${RELEASE_README} is missing.`)
+  const entries = `${git(['ls-tree', '-r', 'HEAD', '--', ...SHIPPED])}\n${readme}`
   git(['update-index', '--add', '--index-info'], { env, input: `${entries}\n` })
   const tree = git(['write-tree'], { env })
 
