@@ -533,6 +533,27 @@ for (const [slot, keys] of Object.entries(TERMINAL)) {
 // The id Orca lists the theme under, and the name of its two files
 const id = "armada-dark";
 const file = "armada";
+// The pictures on the plugin's page, which scripts/capture-screenshots.mjs takes. Orca shows
+// its own drawing of the theme in place of a cover the manifest does not name, and takes at
+// most 6 screenshots.
+const shot = (name, alt, caption) => ({
+  path: `screenshots/${name}.png`,
+  alt,
+  ...(caption && { caption }),
+});
+const cover = shot(
+  "cover",
+  "Armada in Orca: a TypeScript file above a terminal showing git status and the 16 terminal colors",
+);
+const screenshots = [
+  shot("typescript", "A TypeScript file in Orca with the Armada theme", "TypeScript"),
+  shot("python", "A Python file in Orca with the Armada theme", "Python"),
+  shot("css", "A CSS file in Orca with the Armada theme", "CSS"),
+  shot("markdown", "A Markdown file in Orca with the Armada theme", "Markdown"),
+  shot("diff", "A diff of a TypeScript file in Orca with the Armada theme", "A diff"),
+  shot("terminal", "Orca's terminal with the Armada terminal colors", "The terminal"),
+];
+
 const manifest = {
   manifestVersion: 2,
   id: pkg.name,
@@ -544,6 +565,8 @@ const manifest = {
   license: pkg.license,
   repository: pkg.repository.url.replace(/\.git$/, ""),
   engines: { orca: pkg.engines.orca },
+  cover,
+  screenshots,
   contributes: {
     themes: [{ id, title: theme.displayName, path: `themes/${file}.json` }],
     terminalThemes: [

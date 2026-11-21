@@ -3,7 +3,7 @@
   "id": "armada-theme",
   "publisher": "davidseptimus",
   "name": "Armada for Orca",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "execution": "data",
   "description": "A dark color theme inspired by the dark themes of JetBrains Fleet and Air.",
   "license": "MIT",
@@ -11,6 +11,42 @@
   "engines": {
     "orca": ">=1.4.245"
   },
+  "cover": {
+    "path": "screenshots/cover.png",
+    "alt": "Armada in Orca: a TypeScript file above a terminal showing git status and the 16 terminal colors"
+  },
+  "screenshots": [
+    {
+      "path": "screenshots/typescript.png",
+      "alt": "A TypeScript file in Orca with the Armada theme",
+      "caption": "TypeScript"
+    },
+    {
+      "path": "screenshots/python.png",
+      "alt": "A Python file in Orca with the Armada theme",
+      "caption": "Python"
+    },
+    {
+      "path": "screenshots/css.png",
+      "alt": "A CSS file in Orca with the Armada theme",
+      "caption": "CSS"
+    },
+    {
+      "path": "screenshots/markdown.png",
+      "alt": "A Markdown file in Orca with the Armada theme",
+      "caption": "Markdown"
+    },
+    {
+      "path": "screenshots/diff.png",
+      "alt": "A diff of a TypeScript file in Orca with the Armada theme",
+      "caption": "A diff"
+    },
+    {
+      "path": "screenshots/terminal.png",
+      "alt": "Orca's terminal with the Armada terminal colors",
+      "caption": "The terminal"
+    }
+  ],
   "contributes": {
     "themes": [
       {
