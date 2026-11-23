@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.1 (2026-11-23)
+
+- Cards are dark again, the color of the page behind them, and drawn by their outline. The
+  status bar is back to the color of the sidebars.
+- Text fields, selects and steppers have a lighter border and fill, so they stand out on the
+  dark cards. Some were invisible before.
+- In the chat, your own messages and inline code have a fainter tint, and code blocks take the
+  editor's background.
+
 ## 1.1.0 (2026-11-23)
 
 - The app is darker: the chat and the area around the editor take the color of the sidebars,
