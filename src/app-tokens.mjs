@@ -16,7 +16,7 @@ export const appTokens = (colors) => ({
   "--editor-surface": colors.neutral20,
   "--foreground": colors.neutral140,
   // Orca paints its status bar with the card color too
-  "--card": colors.neutral30,
+  "--card": colors.neutral10,
   "--card-foreground": colors.neutral140,
   "--popover": colors.neutral30,
   "--popover-foreground": colors.neutral140,
@@ -32,7 +32,7 @@ export const appTokens = (colors) => ({
   "--accent": colors.neutral40,
   "--accent-foreground": colors.neutral140,
   "--border": colors.neutral30,
-  "--input": colors.neutral10,
+  "--input": colors.neutral40,
   "--ring": colors.blue90,
   // One blue from light to dark, as Orca's own chart colors are. Orca also
   // draws Mermaid diagrams from them: --chart-5 fills a node and --chart-1
@@ -85,12 +85,12 @@ export const appTokens = (colors) => ({
   "--split-divider": colors.neutral40,
   "--split-divider-hover": colors.blue90,
 
-  "--chat-user-message": colors.lightTint8,
+  "--chat-user-message": colors.lightTint5,
   "--chat-bold-foreground": colors.white,
   "--chat-muted-foreground": colors.neutral120,
-  "--chat-inline-code": colors.lightTint10,
+  "--chat-inline-code": colors.lightTint5,
   "--chat-inline-code-foreground": colors.neutral140,
-  "--chat-code-block": colors.lightTint5,
+  "--chat-code-block": colors.neutral20,
   // The blue110 of Tachi Code's links. It is 4.5:1 on the inline code tint
   // only because --background is this dark, and Orca drops the user's message
   // bubble when it is under 4.5:1 on that.
