@@ -7,7 +7,7 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-const SHIPPED = ['orca-plugin.json', 'themes', 'terminal', 'screenshots', 'LICENSE']
+const SHIPPED = ['orca-plugin.json', 'themes', 'terminal', 'screenshots', 'LICENSE', 'CHANGELOG.md']
 // The readme of the release branch is for people who use the theme. This branch's is about the build.
 const RELEASE_README = 'README.main.md'
 const SOURCE_BRANCH = 'develop'

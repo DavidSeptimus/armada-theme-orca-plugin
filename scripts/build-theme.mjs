@@ -132,6 +132,8 @@ const PAIRS = [
   // A hovered inactive tab takes the active tab's text color
   ["--tab-active-foreground", "--tab-inactive", TEXT_CONTRAST],
   ["--foreground", "--chat-user-message", TEXT_CONTRAST],
+  // Links in a message of the user's. Orca drops the bubble over this one.
+  ["--text-link", "--chat-user-message", TEXT_CONTRAST],
   ["--chat-bold-foreground", "--background", TEXT_CONTRAST],
   ["--chat-bold-foreground", "--chat-user-message", TEXT_CONTRAST],
   ["--chat-muted-foreground", "--background", TEXT_CONTRAST],
@@ -141,6 +143,7 @@ const PAIRS = [
   ["--foreground", "--chat-code-block", TEXT_CONTRAST],
   ["--text-link", "--editor-surface", TEXT_CONTRAST],
   ["--foreground", "--editor-selection", TEXT_CONTRAST],
+  ["--chat-selection-foreground", "--chat-selection", TEXT_CONTRAST],
   ["--foreground", "--diff-added-background", TEXT_CONTRAST],
   ["--foreground", "--diff-added-emphasis", TEXT_CONTRAST],
   ["--foreground", "--diff-removed-background", TEXT_CONTRAST],
