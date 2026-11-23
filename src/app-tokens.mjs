@@ -34,11 +34,14 @@ export const appTokens = (colors) => ({
   "--border": colors.neutral30,
   "--input": colors.neutral10,
   "--ring": colors.blue90,
-  "--chart-1": colors.blue110,
-  "--chart-2": colors.green110,
-  "--chart-3": colors.yellow120,
-  "--chart-4": colors.purple110,
-  "--chart-5": colors.orange,
+  // One blue from light to dark, as Orca's own chart colors are. Orca also
+  // draws Mermaid diagrams from them: --chart-5 fills a node and --chart-1
+  // outlines it, and a fill the text is not readable on is darkened to mud.
+  "--chart-1": colors.blue120,
+  "--chart-2": colors.blue100,
+  "--chart-3": colors.blue90,
+  "--chart-4": colors.blue70,
+  "--chart-5": colors.blue60,
 
   // The right sidebar and the settings navigation
   "--sidebar": colors.neutral10,

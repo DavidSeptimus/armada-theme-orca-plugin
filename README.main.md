@@ -21,10 +21,11 @@ Then choose **Armada** under Settings → Appearance. Its terminal colors are of
 
 | | |
 | --- | --- |
-| ![TypeScript](screenshots/typescript.png) | ![HTML](screenshots/html.png) |
+| ![A chat](screenshots/chat.png) | ![TypeScript](screenshots/typescript.png) |
+| ![HTML](screenshots/html.png) | ![The terminal](screenshots/terminal.png) |
 | ![CSS](screenshots/css.png) | ![JSON](screenshots/json.png) |
 | ![Python](screenshots/python.png) | ![Markdown](screenshots/markdown.png) |
-| ![A diff](screenshots/diff.png) | ![The terminal](screenshots/terminal.png) |
+| ![A diff](screenshots/diff.png) | |
 
 ## License
 

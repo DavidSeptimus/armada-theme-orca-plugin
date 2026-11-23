@@ -3,7 +3,7 @@
   "id": "armada-theme",
   "publisher": "davidseptimus",
   "name": "Armada for Orca",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "execution": "data",
   "description": "A dark color theme inspired by the dark themes of JetBrains Fleet and Air.",
   "license": "MIT",
@@ -17,9 +17,9 @@
   },
   "screenshots": [
     {
-      "path": "screenshots/typescript.png",
-      "alt": "A TypeScript file in Orca with the Armada theme",
-      "caption": "TypeScript"
+      "path": "screenshots/chat.png",
+      "alt": "A chat with an agent in Orca with the Armada theme",
+      "caption": "A chat"
     },
     {
       "path": "screenshots/python.png",

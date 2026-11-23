@@ -549,7 +549,7 @@ const cover = shot(
   "Armada in Orca: a TypeScript file above a terminal showing git status and the 16 terminal colors",
 );
 const screenshots = [
-  shot("typescript", "A TypeScript file in Orca with the Armada theme", "TypeScript"),
+  shot("chat", "A chat with an agent in Orca with the Armada theme", "A chat"),
   shot("python", "A Python file in Orca with the Armada theme", "Python"),
   shot("css", "A CSS file in Orca with the Armada theme", "CSS"),
   shot("markdown", "A Markdown file in Orca with the Armada theme", "Markdown"),

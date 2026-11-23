@@ -9,9 +9,9 @@
 //
 // macOS only. Needs Orca installed, and git.
 import { spawn, execFileSync } from "node:child_process";
-import { cp, mkdir, readFile, rm, writeFile, appendFile } from "node:fs/promises";
+import { chmod, cp, mkdir, readFile, rm, writeFile, appendFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { homedir } from "node:os";
+import { homedir, hostname } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { connect } from "./cdp.mjs";
@@ -27,6 +27,7 @@ const cliBinary = join(appDir, "Contents/Resources/bin/orca");
 const workDir = join(homedir(), ".cache/armada-orca-capture");
 const profileDir = join(workDir, "profile");
 const profileHome = join(profileDir, "home");
+const binDir = join(workDir, "bin");
 // The sample project's path shows in the editor's breadcrumb, so it is one without a user name
 const projectDir = process.env.CAPTURE_PROJECT_DIR ?? "/Users/Shared/harbor";
 const projectMarker = join(workDir, "project-path");
@@ -44,7 +45,8 @@ const terminalThemeId = `plugin:${pluginKey}/${manifest.contributes.terminalThem
 // Nothing of the caller's environment reaches the second Orca: run from an Orca terminal, this
 // process carries variables that point at the Orca it runs in
 const cleanEnv = {
-  PATH: "/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:/usr/local/bin",
+  // binDir first: the chat screenshot's stand-in for the claude command is there
+  PATH: binDir + ":/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:/usr/local/bin",
   HOME: profileHome,
   USER: process.env.USER ?? "",
   LANG: "en_US.UTF-8",
@@ -313,12 +315,56 @@ async function shootCover(page) {
   await shoot(page, "cover");
 }
 
+// A chat with an agent. The agent is scripts/fake-claude.mjs, under the name Orca starts Claude
+// Code by: it answers the question below with the same words each time, and needs no account.
+const chatQuestion = "How does `book` pick a berth?";
+
+function machineNames() {
+  const names = [hostname(), hostname().split(".")[0]];
+  try {
+    names.push(execFileSync("scutil", ["--get", "ComputerName"], { encoding: "utf8" }).trim());
+  } catch {
+    // No such name set
+  }
+  return names;
+}
+
+async function installFakeClaude() {
+  await mkdir(binDir, { recursive: true });
+  const command = join(binDir, "claude");
+  const script = join(pluginDir, "scripts/fake-claude.mjs");
+  await writeFile(command, `#!/bin/sh\nexec "${process.execPath}" "${script}" "$@"\n`);
+  await chmod(command, 0o755);
+}
+
+async function shootChat(page) {
+  // The cover's terminal, and the split it is in, would take the lower third
+  await tabMenu(page, tabNamed("zsh"), "Close");
+  orca("agent", "launch", "--agent", "claude", "--surface", "chat", "--worktree", worktree, "--prompt", chatQuestion, "--focus");
+  await page.waitFor(`document.body.innerText.includes("for the rest")`, "the reply in the chat");
+  // Orca asks for a GitHub star a moment after an agent has answered
+  await page.sleep(4000);
+  if (await page.evaluate(`!!(${elementWithText("Later")})`)) await page.clickOn(elementWithText("Later"), "Later");
+  // Under the message box Orca names the machine the agent runs on
+  await page.evaluate(`(() => {
+    const names = ${JSON.stringify(machineNames())};
+    for (const element of document.querySelectorAll("button, span, div")) {
+      if (element.children.length <= 1 && names.includes(element.innerText?.trim())) {
+        // With its icon, which is beside the name
+        (element.closest("button") ?? element.parentElement).style.visibility = "hidden";
+      }
+    }
+  })()`);
+  await shoot(page, "chat");
+}
+
 if (process.platform !== "darwin") throw new Error("This script drives the macOS build of Orca");
 if (!existsSync(appBinary)) throw new Error(`Orca is not at ${appDir}. Set ORCA_APP to its path.`);
 
 await mkdir(workDir, { recursive: true });
 await mkdir(outDir, { recursive: true });
 await makeSampleProject();
+await installFakeClaude();
 
 let page;
 try {
@@ -345,6 +391,7 @@ try {
   await page.sleep(4000);
   await shoot(page, "terminal");
   await shootCover(page);
+  await shootChat(page);
 } finally {
   page?.close();
   // For working on this script: leaves the second Orca up to poke at over the debugging port

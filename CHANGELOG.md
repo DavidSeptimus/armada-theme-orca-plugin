@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.1.0 (2026-11-23)
 
 - The app is darker: the chat and the area around the editor take the color of the sidebars,
   and the editor stays a step lighter.
@@ -11,6 +11,9 @@
   a darker border.
 - Links are a deeper blue.
 - Selected text in the chat has the same blue tint as in the editor.
+- Chart colors are shades of one blue, from light to dark. Mermaid diagrams take their colors
+  from them, and their boxes are now a deep blue where they were a muddy brown.
+- The plugin's page shows a chat with an agent among its screenshots.
 
 ## 1.0.2 (2026-11-20)
 
