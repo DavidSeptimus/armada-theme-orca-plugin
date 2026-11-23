@@ -7,11 +7,17 @@ This is the `develop` branch. The `main` branch holds only the files the plugin 
 Orca's plugin directory reads every file at a version tag. Its readme, for people who use the
 theme, is `README.main.md` here.
 
-## Try it from this folder
+## Live editing
 
 ```sh
-npm run dev                              # orca plugin dev load .
+npm run dev [-- <path to armada.ts>]
 ```
+
+This loads the folder into the running Orca as a development plugin, which stands in for an
+installed copy of the theme, and rebuilds whenever `armada.ts`, a file under `src/` or the build
+script is saved. Orca repaints on each build, so a color change shows a moment after the save. A
+build that fails, on a contrast check for one, prints why and leaves the last good colors in
+place. Ctrl-C unloads the folder and the installed copy is back.
 
 ## How it is built
 
