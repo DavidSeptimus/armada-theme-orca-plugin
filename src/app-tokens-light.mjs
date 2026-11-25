@@ -47,7 +47,7 @@ export const appTokens = (colors) => ({
   "--foreground": colors.neutral10,
   // The color of the page, and drawn by its outline, as the dark cards are.
   // Orca paints its status bar with this color too.
-  "--card": colors.white,
+  "--card": colors.neutral160,
   "--card-foreground": colors.neutral10,
   // Menus are white in Armada Light, with a border
   "--popover": colors.white,
@@ -63,7 +63,7 @@ export const appTokens = (colors) => ({
   // of a menu. Gray, as hover is in Armada: a blue here also fills buttons.
   "--accent": colors.neutral150,
   "--accent-foreground": colors.neutral10,
-  "--border": colors.neutral140,
+  "--border": colors.neutral150,
   // Orca also fills a field with half of this color, so it is the border of
   // a panel and not neutral130, Armada Light's border of a field: half of
   // that is a gray block where Armada Light's fields are white
@@ -78,19 +78,19 @@ export const appTokens = (colors) => ({
   "--chart-5": colors.blue70,
 
   // The right sidebar and the settings navigation: an island
-  "--sidebar": colors.white,
+  "--sidebar": colors.neutral160,
   "--sidebar-foreground": colors.neutral10,
   "--sidebar-primary": colors.blue90,
   "--sidebar-primary-foreground": colors.white,
-  "--sidebar-accent": colors.neutral150,
+  "--sidebar-accent": colors.neutral140,
   "--sidebar-accent-foreground": colors.neutral10,
   // The line between two islands, where the other Armada Lights show the
   // frame
-  "--sidebar-border": colors.neutral140,
+  "--sidebar-border": colors.neutral150,
   "--sidebar-ring": colors.blue90,
 
   // The left workspace sidebar: an island
-  "--worktree-sidebar": colors.white,
+  "--worktree-sidebar": colors.neutral160,
   "--worktree-sidebar-foreground": colors.neutral10,
   // Also the selected item of the settings navigation, which draws a faint
   // ring of --worktree-sidebar-ring around it. Orca wants it opaque.
@@ -104,15 +104,15 @@ export const appTokens = (colors) => ({
   // The current workspace: the tint of a row with focus in Armada Light's
   // lists, with a near-black stroke. The dark theme has a blue tint and a
   // blue border at that strength.
-  "--worktree-sidebar-active": colors.darkTint7,
-  "--worktree-sidebar-active-border": colors.darkTint50,
+  "--worktree-sidebar-active": colors.blueTint10,
+  "--worktree-sidebar-active-border": colors.blueTint50,
   // On every workspace row, so it stays quiet
   "--host-badge": colors.darkTint7,
   "--host-badge-foreground": colors.neutral60,
 
   // The frame. The active tab is blueTint10 over it, Armada Light's active
   // tab (#D7E2EF). Orca wants it opaque.
-  "--tab-bar": colors.neutral150,
+  "--tab-bar": colors.neutral160,
   "--tab-active": over(colors.blueTint10, colors.neutral150),
   "--tab-active-foreground": colors.neutral10,
   // Armada's accent, solid: Armada Light's own line, blueTint50, is under
