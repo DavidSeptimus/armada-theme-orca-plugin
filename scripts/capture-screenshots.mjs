@@ -48,9 +48,13 @@ const VARIANTS = {
   dark: { id: "armada-dark", outDir: screenshotsDir, slot: "Dark" },
   light: { id: "armada-light", outDir: join(screenshotsDir, "light"), slot: "Light" },
 };
-const requested = process.argv.slice(2);
+const requested = [...new Set(process.argv.slice(2))];
 for (const name of requested) {
-  if (!(name in VARIANTS)) throw new Error(`No theme named ${name}. Name dark or light, or neither for both.`);
+  if (!Object.hasOwn(VARIANTS, name)) throw new Error(`No theme named ${name}. Name dark or light, or neither for both.`);
+}
+// CAPTURE_KEEP leaves the second Orca up after a theme, so there is no starting one for the next
+if (process.env.CAPTURE_KEEP && requested.length !== 1) {
+  throw new Error("CAPTURE_KEEP keeps one theme's Orca up. Name dark or light.");
 }
 const variants = (requested.length > 0 ? requested : Object.keys(VARIANTS)).map((name) => ({ name, ...VARIANTS[name] }));
 for (const { id } of variants) {
@@ -462,7 +466,10 @@ async function capture(variant) {
     await shootSettings(page);
   } catch (error) {
     // CAPTURE_KEEP exits below, before the error would be printed
-    console.error(error);
+    if (process.env.CAPTURE_KEEP) {
+      console.error(error);
+      process.exitCode = 1;
+    }
     throw error;
   } finally {
     page?.close();

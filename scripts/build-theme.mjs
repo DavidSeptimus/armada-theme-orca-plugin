@@ -245,7 +245,12 @@ function checkedTokens(name, appTokens) {
     painted(tokens, token);
   }
   for (const [text, surface, floor, beneath = []] of PAIRS) {
-    if (!tokens[text] || !tokens[surface]) {
+    if (![text, surface, ...beneath].every((token) => tokens[token])) {
+      continue;
+    }
+    // An opaque surface hides what is beneath it, so the pair without
+    // `beneath` has already checked it
+    if (beneath.length > 0 && parseHex(tokens[surface])[3] === 1) {
       continue;
     }
     const ratio = contrast(
@@ -253,7 +258,7 @@ function checkedTokens(name, appTokens) {
       painted(tokens, surface, beneath),
     );
     if (ratio < floor) {
-      const where = beneath.length > 0 ? ` over ${beneath[0]}` : "";
+      const where = beneath.map((token) => ` over ${token}`).join("");
       failures.push(
         `${text} on ${surface}${where} is ${ratio.toFixed(2)}:1, under ${floor}:1`,
       );
@@ -576,7 +581,11 @@ const screenshots = [
   shot("terminal", "Orca's terminal with the Armada terminal colors", "The terminal"),
 ];
 
-/** Builds one theme and writes its two files. Returns its manifest entries. */
+/**
+ * Builds one theme. Returns its two files and its manifest entries. Nothing
+ * is written here: a theme that fails must not leave the other's files, or
+ * the manifest, out of step with it.
+ */
 async function build({ id, file, source, appTokens, tokenColors }) {
   const { default: theme, palette } = await import(pathToFileURL(source).href);
   if (!palette) {
@@ -617,13 +626,6 @@ async function build({ id, file, source, appTokens, tokenColors }) {
   }
 
   const themeFile = serialize(rules);
-  // Minified: Orca caps the file and the code colors are most of it
-  writeFileSync(resolve(root, `themes/${file}.json`), themeFile + "\n");
-  writeFileSync(
-    resolve(root, `terminal/${file}.json`),
-    JSON.stringify({ schemaVersion: 1, mode: theme.type, terminal }, null, 2) +
-      "\n",
-  );
 
   console.log(`${theme.displayName} (${id})`);
   console.log(`  ${Object.keys(tokens).length} app tokens, all pairs readable`);
@@ -646,11 +648,16 @@ async function build({ id, file, source, appTokens, tokenColors }) {
   return {
     theme: { id, title: theme.displayName, path: `themes/${file}.json` },
     terminalTheme: { id, title: theme.displayName, path: `terminal/${file}.json` },
+    files: {
+      // Minified: Orca caps the file and the code colors are most of it
+      [`themes/${file}.json`]: themeFile + "\n",
+      [`terminal/${file}.json`]:
+        JSON.stringify({ schemaVersion: 1, mode: theme.type, terminal }, null, 2) +
+        "\n",
+    },
   };
 }
 
-mkdirSync(resolve(root, "themes"), { recursive: true });
-mkdirSync(resolve(root, "terminal"), { recursive: true });
 const built = [];
 for (const variant of VARIANTS) {
   built.push(await build(variant));
@@ -675,7 +682,13 @@ const manifest = {
   },
   capabilities: [],
 };
-writeFileSync(
-  resolve(root, "orca-plugin.json"),
-  JSON.stringify(manifest, null, 2) + "\n",
-);
+
+mkdirSync(resolve(root, "themes"), { recursive: true });
+mkdirSync(resolve(root, "terminal"), { recursive: true });
+const files = {
+  ...Object.assign({}, ...built.map((entry) => entry.files)),
+  "orca-plugin.json": JSON.stringify(manifest, null, 2) + "\n",
+};
+for (const [path, content] of Object.entries(files)) {
+  writeFileSync(resolve(root, path), content);
+}
