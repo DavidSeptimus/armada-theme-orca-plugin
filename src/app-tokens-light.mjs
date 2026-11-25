@@ -19,10 +19,12 @@
 //
 // A hovered, selected or current row is a light tint on white, as Armada
 // Light's lists are, not a gray block. neutral150 is that tint where Orca
-// wants an opaque color: darkTint7 over white is #EFEFEF. The current or
-// selected item of a sidebar is marked by a near-black stroke, never a blue
-// fill, which would sit against the blue of a badge. The selection is
-// blue130 (#A8C6F4), the IntelliJ theme's.
+// wants an opaque color: darkTint7 over white is #EFEFEF. The current
+// workspace and the selected item of the settings navigation are marked by a
+// near-black stroke, never a blue fill, which would sit against the blue of a
+// badge. The active tab, and the active tool of the right sidebar, have a
+// blue line under them. The selection is blue130 (#A8C6F4), the IntelliJ
+// theme's.
 //
 // Orca drops a text and surface pair under its contrast floor and paints its
 // own colors instead; scripts/build-theme.mjs fails on one.
