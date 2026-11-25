@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Armada Light, a light theme beside Armada: the app, the code in the editor and the terminal.
+  Orca offers it as the light theme and Armada as the dark one.
+
 ## 1.1.1 (2026-11-23)
 
 - Cards are dark again, the color of the page behind them, and drawn by their outline. The

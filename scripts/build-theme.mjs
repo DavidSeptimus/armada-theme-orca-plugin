@@ -1,40 +1,49 @@
-// Builds the Orca plugin (orca-plugin.json, themes/armada.json and
-// terminal/armada.json) from Tachi Code's Armada theme, the source of truth
-// for the colors.
+// Builds the Orca plugin (orca-plugin.json and, for each of Armada and Armada
+// Light, a file under themes/ and one under terminal/) from Tachi Code's
+// Armada themes, the source of truth for the colors.
 //
-//   npm run build [-- <path to armada.ts>]
+//   npm run build [-- <path to armada.ts> [<path to armada-light.ts>]]
 //
-// Tachi Code provides the theme and its named palette. What is Orca's own
-// lives here: the app colors in src/app-tokens.mjs, and the code colors Orca
-// needs on top of the theme's in src/token-colors.mjs. The theme's code
-// colors are cut down to what Orca reads and to Orca's 16 KiB limit on a
-// theme file; see compactTokenColors below.
+// Tachi Code provides each theme and its named palette. What is Orca's own
+// lives here: the app colors in src/app-tokens.mjs and
+// src/app-tokens-light.mjs, and the code colors Orca needs on top of the
+// theme's in src/token-colors.mjs and src/token-colors-light.mjs. The two
+// themes are built the same way and share no colors: each takes its code
+// colors from its own source. A theme's code colors are cut down to what Orca
+// reads and to Orca's 16 KiB limit on a theme file; see compactTokenColors
+// below.
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { appTokens } from "../src/app-tokens.mjs";
-import { tokenColors as orcaTokenColorsFor } from "../src/token-colors.mjs";
+import { appTokens as lightAppTokens } from "../src/app-tokens-light.mjs";
+import { tokenColors } from "../src/token-colors.mjs";
+import { tokenColors as lightTokenColors } from "../src/token-colors-light.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const source = resolve(
+const darkSource = resolve(
   process.argv[2] ??
     resolve(root, "../tachi-code/src/entrypoints/code/shiki/themes/armada.ts"),
 );
-const { default: theme, palette } = await import(pathToFileURL(source).href);
-if (!palette) {
-  throw new Error(`${source} has no palette export`);
-}
-// A name the palette lacks would otherwise reach the theme as `undefined`
-const named = new Proxy(palette, {
-  get(colors, name) {
-    if (!(name in colors)) {
-      throw new Error(`The palette has no color named ${String(name)}`);
-    }
-    return colors[name];
+// Each theme: the id Orca lists it under, the name of its two files, its
+// source in Tachi Code and what Orca adds to it. The light source is beside
+// the dark one unless it is named.
+const VARIANTS = [
+  {
+    id: "armada-dark",
+    file: "armada",
+    source: darkSource,
+    appTokens,
+    tokenColors,
   },
-});
-const orcaTokens = appTokens(named);
-const orcaTokenColors = orcaTokenColorsFor(named);
+  {
+    id: "armada-light",
+    file: "armada-light",
+    source: resolve(process.argv[3] ?? resolve(dirname(darkSource), "armada-light.ts")),
+    appTokens: lightAppTokens,
+    tokenColors: lightTokenColors,
+  },
+];
 const pkg = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"));
 
 // Orca's limits (docs/reference/plugin-themes.md in stablyai/orca)
@@ -101,13 +110,15 @@ const TRANSLUCENT = {
   "--diff-removed-gutter": "--editor-surface",
 };
 
-// The text and surface pairs Orca checks, as [text, surface, floor]. Orca
+// The text and surface pairs Orca checks, as [text, surface, floor] and, for
+// a surface that is over another chat surface, the surfaces beneath it. Orca
 // drops a failing pair and paints its own colors, so a failure here stops
 // the build. This list follows Orca's documented checks; Orca's own check at
 // load time is the authority.
 const PAIRS = [
   ["--foreground", "--background", TEXT_CONTRAST],
   ["--foreground", "--editor-surface", TEXT_CONTRAST],
+  ["--muted-foreground", "--editor-surface", TEXT_CONTRAST],
   ["--card-foreground", "--card", TEXT_CONTRAST],
   ["--popover-foreground", "--popover", TEXT_CONTRAST],
   ["--primary-foreground", "--primary", TEXT_CONTRAST],
@@ -140,10 +151,29 @@ const PAIRS = [
   ["--chat-muted-foreground", "--chat-code-block", TEXT_CONTRAST],
   ["--chat-inline-code-foreground", "--chat-inline-code", TEXT_CONTRAST],
   ["--text-link", "--chat-inline-code", TEXT_CONTRAST],
+  // Inline code in a message of the user's
+  ...["--chat-inline-code-foreground", "--text-link"].map((text) => [
+    text,
+    "--chat-inline-code",
+    TEXT_CONTRAST,
+    ["--chat-user-message", "--background"],
+  ]),
   ["--foreground", "--chat-code-block", TEXT_CONTRAST],
   ["--text-link", "--editor-surface", TEXT_CONTRAST],
   ["--foreground", "--editor-selection", TEXT_CONTRAST],
-  ["--chat-selection-foreground", "--chat-selection", TEXT_CONTRAST],
+  // A translucent selection shows the chat surface it is over
+  ...[
+    [],
+    ["--chat-user-message", "--background"],
+    ["--chat-code-block", "--background"],
+    ["--chat-inline-code", "--background"],
+    ["--chat-inline-code", "--chat-user-message", "--background"],
+  ].map((beneath) => [
+    "--chat-selection-foreground",
+    "--chat-selection",
+    TEXT_CONTRAST,
+    beneath,
+  ]),
   ["--foreground", "--diff-added-background", TEXT_CONTRAST],
   ["--foreground", "--diff-added-emphasis", TEXT_CONTRAST],
   ["--foreground", "--diff-removed-background", TEXT_CONTRAST],
@@ -159,42 +189,27 @@ const PAIRS = [
   ].map((kind) => [`--git-decoration-${kind}`, "--sidebar", CODE_CONTRAST]),
 ];
 
-const tokens = Object.fromEntries(
-  Object.entries(orcaTokens).map(([token, value]) => [
-    token,
-    value.toLowerCase(),
-  ]),
-);
-
-/** The opaque color a token paints: itself, or its tint over what is under it. */
-function painted(token) {
+/**
+ * The opaque color a token paints: itself, or its tint over what is under it.
+ * `beneath` names the surfaces under it, topmost first, where that is not the
+ * one in TRANSLUCENT: inline code in a message of the user's is over the
+ * message, which is over the chat.
+ */
+function painted(tokens, token, beneath = []) {
   const value = tokens[token];
-  const [, , , alpha] = parseHex(value);
+  const [r, g, b, alpha] = parseHex(value);
   if (alpha === 1) {
-    return parseHex(value);
+    return [r, g, b, 1];
   }
-  const under = TRANSLUCENT[token];
-  if (!under) {
+  const [next = TRANSLUCENT[token], ...rest] = beneath;
+  if (!next) {
     throw new Error(`${token} (${value}) must be opaque`);
   }
-  return over(value, tokens[under]);
+  const [ur, ug, ub] = painted(tokens, next, rest);
+  const mix = (c, u) => Math.round(c * alpha + u * (1 - alpha));
+  return [mix(r, ur), mix(g, ug), mix(b, ub), 1];
 }
 
-const failures = [];
-for (const token of Object.keys(tokens)) {
-  painted(token);
-}
-for (const [text, surface, floor] of PAIRS) {
-  if (!tokens[text] || !tokens[surface]) {
-    continue;
-  }
-  const ratio = contrast(painted(text), painted(surface));
-  if (ratio < floor) {
-    failures.push(
-      `${text} on ${surface} is ${ratio.toFixed(2)}:1, under ${floor}:1`,
-    );
-  }
-}
 // Orca's other checks (plugin-theme-contrast-rules.ts in stablyai/orca). A
 // ring or line under 2:1 on what it marks is dropped, and so is a border too
 // faint to see.
@@ -217,24 +232,53 @@ const BORDERS = [
   "--split-divider-hover",
 ];
 const BORDER_MIN_ALPHA = 0.05;
-for (const [ring, surface] of RINGS) {
-  if (!tokens[ring] || !tokens[surface]) {
-    continue;
+/** The app tokens in lower case, checked. Throws on a pair Orca would drop. */
+function checkedTokens(name, appTokens) {
+  const tokens = Object.fromEntries(
+    Object.entries(appTokens).map(([token, value]) => [
+      token,
+      value.toLowerCase(),
+    ]),
+  );
+  const failures = [];
+  for (const token of Object.keys(tokens)) {
+    painted(tokens, token);
   }
-  const ratio = contrast(painted(ring), painted(surface));
-  if (ratio < RING_CONTRAST) {
-    failures.push(
-      `${ring} on ${surface} is ${ratio.toFixed(2)}:1, under ${RING_CONTRAST}:1`,
+  for (const [text, surface, floor, beneath = []] of PAIRS) {
+    if (!tokens[text] || !tokens[surface]) {
+      continue;
+    }
+    const ratio = contrast(
+      painted(tokens, text),
+      painted(tokens, surface, beneath),
     );
+    if (ratio < floor) {
+      const where = beneath.length > 0 ? ` over ${beneath[0]}` : "";
+      failures.push(
+        `${text} on ${surface}${where} is ${ratio.toFixed(2)}:1, under ${floor}:1`,
+      );
+    }
   }
-}
-for (const border of BORDERS) {
-  if (tokens[border] && parseHex(tokens[border])[3] < BORDER_MIN_ALPHA) {
-    failures.push(`${border} is under ${BORDER_MIN_ALPHA} opacity`);
+  for (const [ring, surface] of RINGS) {
+    if (!tokens[ring] || !tokens[surface]) {
+      continue;
+    }
+    const ratio = contrast(painted(tokens, ring), painted(tokens, surface));
+    if (ratio < RING_CONTRAST) {
+      failures.push(
+        `${ring} on ${surface} is ${ratio.toFixed(2)}:1, under ${RING_CONTRAST}:1`,
+      );
+    }
   }
-}
-if (failures.length > 0) {
-  throw new Error(`Contrast:\n  ${failures.join("\n  ")}`);
+  for (const border of BORDERS) {
+    if (tokens[border] && parseHex(tokens[border])[3] < BORDER_MIN_ALPHA) {
+      failures.push(`${border} is under ${BORDER_MIN_ALPHA} opacity`);
+    }
+  }
+  if (failures.length > 0) {
+    throw new Error(`${name}, contrast:\n  ${failures.join("\n  ")}`);
+  }
+  return tokens;
 }
 
 // ----------------------------------------------------------- code colors --
@@ -490,20 +534,6 @@ function compactTokenColors(
   return { rules: groupRules(kept), kept: kept.size, report };
 }
 
-const serialize = (tokenColors) =>
-  JSON.stringify({ schemaVersion: 1, base: theme.type, tokens, tokenColors });
-
-const { rules, kept, report } = compactTokenColors(
-  // The Orca-only rules last, so they win over the theme's own
-  [...theme.tokenColors, ...orcaTokenColors],
-  new Set(orcaTokenColors.flatMap((rule) => rule.scope)),
-  tokens["--editor-surface"],
-  tokens["--foreground"],
-  // One byte for the file's closing newline
-  (candidate) =>
-    Buffer.byteLength(serialize(candidate)) + 1 <= THEME_FILE_MAX_BYTES,
-);
-
 // --------------------------------------------------------- terminal theme --
 
 const TERMINAL = {
@@ -523,19 +553,8 @@ const TERMINAL = {
   ),
 };
 
-const terminal = {};
-for (const [slot, keys] of Object.entries(TERMINAL)) {
-  const value = keys.map((key) => theme.colors[key]).find(Boolean);
-  if (value) {
-    terminal[slot] = value.toLowerCase();
-  }
-}
-
 // ----------------------------------------------------------------- output --
 
-// The id Orca lists the theme under, and the name of its two files
-const id = "armada-dark";
-const file = "armada";
 // The pictures on the plugin's page, which scripts/capture-screenshots.mjs takes. Orca shows
 // its own drawing of the theme in place of a cover the manifest does not name, and takes at
 // most 6 screenshots.
@@ -550,12 +569,92 @@ const cover = shot(
 );
 const screenshots = [
   shot("chat", "A chat with an agent in Orca with the Armada theme", "A chat"),
+  shot("light/cover", "Armada Light in Orca: a TypeScript file above a terminal", "Armada Light"),
+  shot("light/chat", "A chat with an agent in Orca with the Armada Light theme", "A chat, Armada Light"),
   shot("python", "A Python file in Orca with the Armada theme", "Python"),
-  shot("css", "A CSS file in Orca with the Armada theme", "CSS"),
-  shot("markdown", "A Markdown file in Orca with the Armada theme", "Markdown"),
   shot("diff", "A diff of a TypeScript file in Orca with the Armada theme", "A diff"),
   shot("terminal", "Orca's terminal with the Armada terminal colors", "The terminal"),
 ];
+
+/** Builds one theme and writes its two files. Returns its manifest entries. */
+async function build({ id, file, source, appTokens, tokenColors }) {
+  const { default: theme, palette } = await import(pathToFileURL(source).href);
+  if (!palette) {
+    throw new Error(`${source} has no palette export`);
+  }
+  // A name the palette lacks would otherwise reach the theme as `undefined`
+  const named = new Proxy(palette, {
+    get(colors, name) {
+      if (!(name in colors)) {
+        throw new Error(`${source}: the palette has no color named ${String(name)}`);
+      }
+      return colors[name];
+    },
+  });
+  const tokens = checkedTokens(theme.displayName, appTokens(named));
+  const orcaTokenColors = tokenColors(named);
+
+  const serialize = (tokenColors) =>
+    JSON.stringify({ schemaVersion: 1, base: theme.type, tokens, tokenColors });
+
+  const { rules, kept, report } = compactTokenColors(
+    // The Orca-only rules last, so they win over the theme's own
+    [...theme.tokenColors, ...orcaTokenColors],
+    new Set(orcaTokenColors.flatMap((rule) => rule.scope)),
+    tokens["--editor-surface"],
+    tokens["--foreground"],
+    // One byte for the file's closing newline
+    (candidate) =>
+      Buffer.byteLength(serialize(candidate)) + 1 <= THEME_FILE_MAX_BYTES,
+  );
+
+  const terminal = {};
+  for (const [slot, keys] of Object.entries(TERMINAL)) {
+    const value = keys.map((key) => theme.colors[key]).find(Boolean);
+    if (value) {
+      terminal[slot] = value.toLowerCase();
+    }
+  }
+
+  const themeFile = serialize(rules);
+  // Minified: Orca caps the file and the code colors are most of it
+  writeFileSync(resolve(root, `themes/${file}.json`), themeFile + "\n");
+  writeFileSync(
+    resolve(root, `terminal/${file}.json`),
+    JSON.stringify({ schemaVersion: 1, mode: theme.type, terminal }, null, 2) +
+      "\n",
+  );
+
+  console.log(`${theme.displayName} (${id})`);
+  console.log(`  ${Object.keys(tokens).length} app tokens, all pairs readable`);
+  console.log(
+    `  ${kept} code scopes in ${rules.length} rules; theme file ${Buffer.byteLength(themeFile) + 1} of ${THEME_FILE_MAX_BYTES} bytes`,
+  );
+  console.log(
+    `  dropped: ${report.parentScope} selectors with a parent scope, ${report.redundant} that repeat their parent's style`,
+  );
+  if (report.cut.length > 0) {
+    console.log(`  cut to fit: ${report.cut.join(", ")}`);
+  }
+  if (report.lowContrast.length > 0) {
+    console.log(
+      `  moved to ${CODE_CONTRAST}:1 on the editor, under which Orca paints its own color:\n    ${report.lowContrast.join("\n    ")}`,
+    );
+  }
+  console.log(`  ${Object.keys(terminal).length} terminal colors`);
+
+  return {
+    theme: { id, title: theme.displayName, path: `themes/${file}.json` },
+    terminalTheme: { id, title: theme.displayName, path: `terminal/${file}.json` },
+  };
+}
+
+mkdirSync(resolve(root, "themes"), { recursive: true });
+mkdirSync(resolve(root, "terminal"), { recursive: true });
+const built = [];
+for (const variant of VARIANTS) {
+  built.push(await build(variant));
+}
 
 const manifest = {
   manifestVersion: 2,
@@ -571,42 +670,12 @@ const manifest = {
   cover,
   screenshots,
   contributes: {
-    themes: [{ id, title: theme.displayName, path: `themes/${file}.json` }],
-    terminalThemes: [
-      { id, title: theme.displayName, path: `terminal/${file}.json` },
-    ],
+    themes: built.map((entry) => entry.theme),
+    terminalThemes: built.map((entry) => entry.terminalTheme),
   },
   capabilities: [],
 };
-
-const themeFile = serialize(rules);
-mkdirSync(resolve(root, "themes"), { recursive: true });
-mkdirSync(resolve(root, "terminal"), { recursive: true });
 writeFileSync(
   resolve(root, "orca-plugin.json"),
   JSON.stringify(manifest, null, 2) + "\n",
 );
-// Minified: Orca caps the file and the code colors are most of it
-writeFileSync(resolve(root, `themes/${file}.json`), themeFile + "\n");
-writeFileSync(
-  resolve(root, `terminal/${file}.json`),
-  JSON.stringify({ schemaVersion: 1, mode: theme.type, terminal }, null, 2) +
-    "\n",
-);
-
-console.log(`${Object.keys(tokens).length} app tokens, all pairs readable`);
-console.log(
-  `${kept} code scopes in ${rules.length} rules; theme file ${Buffer.byteLength(themeFile) + 1} of ${THEME_FILE_MAX_BYTES} bytes`,
-);
-console.log(
-  `dropped: ${report.parentScope} selectors with a parent scope, ${report.redundant} that repeat their parent's style`,
-);
-if (report.cut.length > 0) {
-  console.log(`cut to fit: ${report.cut.join(", ")}`);
-}
-if (report.lowContrast.length > 0) {
-  console.log(
-    `lifted to ${CODE_CONTRAST}:1 on the editor, under which Orca paints its own color:\n  ${report.lowContrast.join("\n  ")}`,
-  );
-}
-console.log(`${Object.keys(terminal).length} terminal colors`);

@@ -13,7 +13,7 @@ function run(command, args) {
   return spawn(command, args, { cwd: root, stdio: 'inherit' })
 }
 
-// node --watch follows what the build imports: src/, and the armada.ts it is pointed at
+// node --watch follows what the build imports: src/, and the two theme files it is pointed at
 const builder = run(process.execPath, [
   '--watch',
   '--watch-preserve-output',

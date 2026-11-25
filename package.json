@@ -1,7 +1,7 @@
 {
   "name": "armada-theme",
   "displayName": "Armada for Orca",
-  "description": "A dark color theme inspired by the dark themes of JetBrains Fleet and Air.",
+  "description": "Dark and light color themes inspired by the themes of JetBrains Fleet and Air.",
   "version": "1.1.1",
   "private": true,
   "publisher": "davidseptimus",
