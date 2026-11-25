@@ -2,27 +2,20 @@
 // Armada Light's palette (`palette` in Tachi Code's armada-light.ts, which
 // follows the IntelliJ Armada Light UI theme). It is a map of its own because
 // the two palettes share few names: the dark one steps up from the shell
-// through neutral20, 30 and 40, and the light one has the frame (neutral150),
-// white, and the border grays.
+// through neutral20, 30 and 40, and the light one has white, two light grays
+// (neutral160, neutral150) and the border grays.
 //
-// Armada Light is white islands on a gray frame. Only the frame is gray
-// (neutral150, #EEEFF0, as in JetBrains Air): the strip of tabs across the
-// top of the window. Every surface on it is white: both sidebars, the chat,
-// the editor, cards, menus. In the dark theme the split is the other way
-// round, a black shell with one lighter island, because there the sidebars
-// and the chat are the shell.
+// The window is a light gray frame around a white center. The frame is
+// neutral160 (#F8F8F9): both sidebars, the strip of tabs, and cards with the
+// status bar. The chat, the editor, the page around them and menus are
+// white. The other Armada Lights have white sidebars on a frame of neutral150
+// with a gap between panels; Orca separates panels by a thin line only, and
+// with white sidebars its window is flat. As in the dark theme, the sidebars
+// and the strip of tabs are one color and the editor another.
 //
-// Orca has fewer tokens than the frame has parts, so three parts of the frame
-// are white here, each with the surface it shares a token with: the strip of
-// icons at the far left and the title above it (--worktree-sidebar), the row
-// of tools above the right sidebar (--sidebar) and the status bar (--card).
-//
-// A hovered, selected or current row is a light tint on white, as Armada
-// Light's lists are, not a gray block. neutral150 is that tint where Orca
-// wants an opaque color: darkTint7 over white is #EFEFEF. The current
-// workspace and the selected item of the settings navigation are marked by a
-// near-black stroke, never a blue fill, which would sit against the blue of a
-// badge. The active tab, and the active tool of the right sidebar, have a
+// A hovered or selected row is a gray a step or two darker than what it is
+// on. The current workspace is blue, as in the dark theme, and so is the
+// active tab; the active tab and the active tool of the right sidebar have a
 // blue line under them. The selection is blue130 (#A8C6F4), the IntelliJ
 // theme's.
 //
@@ -41,12 +34,12 @@ function over(tint, base) {
 
 /** @param {Record<string, string>} colors Armada Light's palette */
 export const appTokens = (colors) => ({
-  // The page behind the chat and around the editor: an island
+  // The page behind the chat and around the editor
   "--background": colors.white,
   "--editor-surface": colors.white,
   "--foreground": colors.neutral10,
-  // The color of the page, and drawn by its outline, as the dark cards are.
-  // Orca paints its status bar with this color too.
+  // The frame's color: Orca paints its status bar with this color too. A
+  // card in the settings is half of it over the white page.
   "--card": colors.neutral160,
   "--card-foreground": colors.neutral10,
   // Menus are white in Armada Light, with a border
@@ -56,14 +49,16 @@ export const appTokens = (colors) => ({
   "--primary-foreground": colors.white,
   "--secondary": colors.neutral140,
   "--secondary-foreground": colors.neutral10,
-  // The fill of Armada Light's widgets, a step off white
-  "--muted": colors.neutral160,
+  // A step darker than the sidebars, so a quiet fill shows on them
+  "--muted": colors.neutral150,
   "--muted-foreground": colors.neutral80,
   // Orca's one fill for hovered buttons and rows and for the highlighted item
   // of a menu. Gray, as hover is in Armada: a blue here also fills buttons.
   "--accent": colors.neutral150,
   "--accent-foreground": colors.neutral10,
-  "--border": colors.neutral150,
+  // The outline of a card: Orca paints a settings card at half of --card,
+  // which is #FBFBFC on the white page, so the outline is what shows it
+  "--border": colors.neutral140,
   // Orca also fills a field with half of this color, so it is the border of
   // a panel and not neutral130, Armada Light's border of a field: half of
   // that is a gray block where Armada Light's fields are white
@@ -77,49 +72,49 @@ export const appTokens = (colors) => ({
   "--chart-4": colors.blue80,
   "--chart-5": colors.blue70,
 
-  // The right sidebar and the settings navigation: an island
+  // The right sidebar: part of the frame
   "--sidebar": colors.neutral160,
   "--sidebar-foreground": colors.neutral10,
   "--sidebar-primary": colors.blue90,
   "--sidebar-primary-foreground": colors.white,
   "--sidebar-accent": colors.neutral140,
   "--sidebar-accent-foreground": colors.neutral10,
-  // The line between two islands, where the other Armada Lights show the
-  // frame
+  // Quiet: the sidebar's fill sets it off from the white center
   "--sidebar-border": colors.neutral150,
   "--sidebar-ring": colors.blue90,
 
-  // The left workspace sidebar: an island
+  // The left workspace sidebar, the strip of icons beside it and the settings
+  // navigation: part of the frame
   "--worktree-sidebar": colors.neutral160,
   "--worktree-sidebar-foreground": colors.neutral10,
   // Also the selected item of the settings navigation, which draws a faint
   // ring of --worktree-sidebar-ring around it. Orca wants it opaque.
-  "--worktree-sidebar-accent": colors.neutral150,
+  "--worktree-sidebar-accent": colors.neutral140,
   "--worktree-sidebar-accent-foreground": colors.neutral10,
   "--worktree-sidebar-border": colors.neutral140,
   // Orca draws the ring of the selected settings item at a quarter of this
-  // color's opacity: the near-black stroke of a selected item. Focus rings in
-  // the workspace sidebar take it too.
+  // color's opacity, a gray stroke around its tile. Focus rings in the
+  // workspace sidebar take it too.
   "--worktree-sidebar-ring": colors.neutral10,
-  // The current workspace: the tint of a row with focus in Armada Light's
-  // lists, with a near-black stroke. The dark theme has a blue tint and a
-  // blue border at that strength.
+  // The current workspace: a blue tint with a blue border, as in the dark
+  // theme, and the tint of Armada Light's active tab
   "--worktree-sidebar-active": colors.blueTint10,
   "--worktree-sidebar-active-border": colors.blueTint50,
   // On every workspace row, so it stays quiet
   "--host-badge": colors.darkTint7,
   "--host-badge-foreground": colors.neutral60,
 
-  // The frame. The active tab is blueTint10 over it, Armada Light's active
-  // tab (#D7E2EF). Orca wants it opaque.
+  // The strip of tabs, part of the frame. The active tab is blueTint10 over
+  // it, Armada Light's active tab (#E0EAF7). Orca wants it opaque.
   "--tab-bar": colors.neutral160,
-  "--tab-active": over(colors.blueTint10, colors.neutral150),
+  "--tab-active": over(colors.blueTint10, colors.neutral160),
   "--tab-active-foreground": colors.neutral10,
   // Armada's accent, solid: Armada Light's own line, blueTint50, is under
   // 2:1 on the tab, and Orca then paints the tab's text color. The same line
   // marks the active tool of the right sidebar.
   "--tab-active-indicator": colors.blue90,
-  "--tab-inactive": colors.neutral150,
+  // The strip's own color: a tab that is not active is told by its text
+  "--tab-inactive": colors.neutral160,
   "--tab-inactive-foreground": colors.neutral80,
   "--split-divider": colors.neutral140,
   "--split-divider-hover": colors.blue90,
