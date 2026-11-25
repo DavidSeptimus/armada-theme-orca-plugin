@@ -8,6 +8,9 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
 const SHIPPED = ['orca-plugin.json', 'themes', 'terminal', 'screenshots', 'LICENSE', 'CHANGELOG.md']
+// Pictures of settings pages, in either theme's folder. They are for comparing the two themes
+// while working on them; neither the plugin's page nor the release's readme shows them.
+const NOT_SHIPPED = /^screenshots\/(?:[^/]+\/)*settings-[^/]*\.png$/
 // The readme of the release branch is for people who use the theme. This branch's is about the build.
 const RELEASE_README = 'README.main.md'
 const SOURCE_BRANCH = 'develop'
@@ -35,7 +38,12 @@ try {
   const env = { ...process.env, GIT_INDEX_FILE: join(work, 'index') }
   const readme = git(['ls-tree', 'HEAD', '--', RELEASE_README]).replace(RELEASE_README, 'README.md')
   if (!readme) fail(`${RELEASE_README} is missing.`)
-  const entries = `${git(['ls-tree', '-r', 'HEAD', '--', ...SHIPPED])}\n${readme}`
+  // A line of ls-tree is `<mode> <type> <object>\t<path>`
+  const shipped = git(['ls-tree', '-r', 'HEAD', '--', ...SHIPPED])
+    .split('\n')
+    .filter((line) => !NOT_SHIPPED.test(line.slice(line.indexOf('\t') + 1)))
+    .join('\n')
+  const entries = `${shipped}\n${readme}`
   git(['update-index', '--add', '--index-info'], { env, input: `${entries}\n` })
   const tree = git(['write-tree'], { env })
 

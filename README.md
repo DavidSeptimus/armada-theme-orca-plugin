@@ -107,7 +107,9 @@ On `develop`, with everything else committed:
    ```
 
    It commits the shipped files to `main`, with `README.main.md` as their `README.md`, validates
-   that commit with `orca plugin validate` and tags it `v<version>`. It does not push.
+   that commit with `orca plugin validate` and tags it `v<version>`. It does not push. The
+   pictures of settings pages (`screenshots/settings-*.png`, and the same under `light/`) stay on
+   `develop`: nothing on the plugin's page or in the release's readme shows them.
 7. Push the two branches and the tag. The script prints the command:
 
    ```sh

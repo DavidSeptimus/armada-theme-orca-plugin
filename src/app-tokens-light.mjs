@@ -113,8 +113,10 @@ export const appTokens = (colors) => ({
   "--tab-bar": colors.neutral150,
   "--tab-active": over(colors.blueTint10, colors.neutral150),
   "--tab-active-foreground": colors.neutral10,
-  // Near-black: the same line marks the active tool of the right sidebar
-  "--tab-active-indicator": colors.neutral10,
+  // Armada's accent, solid: Armada Light's own line, blueTint50, is under
+  // 2:1 on the tab, and Orca then paints the tab's text color. The same line
+  // marks the active tool of the right sidebar.
+  "--tab-active-indicator": colors.blue90,
   "--tab-inactive": colors.neutral150,
   "--tab-inactive-foreground": colors.neutral80,
   "--split-divider": colors.neutral140,
