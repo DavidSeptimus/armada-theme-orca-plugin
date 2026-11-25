@@ -27,6 +27,16 @@
 // Orca drops a text and surface pair under its contrast floor and paints its
 // own colors instead; scripts/build-theme.mjs fails on one.
 
+/** `tint` (#rrggbbaa) painted over the opaque `base`, as #RRGGBB. */
+function over(tint, base) {
+  const channel = (hex, i) => parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16);
+  const alpha = channel(tint, 3) / 255;
+  return `#${[0, 1, 2]
+    .map((i) => Math.round(channel(tint, i) * alpha + channel(base, i) * (1 - alpha)))
+    .map((c) => c.toString(16).padStart(2, "0"))
+    .join("")}`.toUpperCase();
+}
+
 /** @param {Record<string, string>} colors Armada Light's palette */
 export const appTokens = (colors) => ({
   // The page behind the chat and around the editor: an island
@@ -99,9 +109,9 @@ export const appTokens = (colors) => ({
   "--host-badge-foreground": colors.neutral60,
 
   // The frame. The active tab is blueTint10 over it, Armada Light's active
-  // tab. Orca wants it opaque.
+  // tab (#D7E2EF). Orca wants it opaque.
   "--tab-bar": colors.neutral150,
-  "--tab-active": "#D7E2EF",
+  "--tab-active": over(colors.blueTint10, colors.neutral150),
   "--tab-active-foreground": colors.neutral10,
   // Near-black: the same line marks the active tool of the right sidebar
   "--tab-active-indicator": colors.neutral10,

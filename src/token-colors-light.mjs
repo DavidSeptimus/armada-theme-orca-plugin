@@ -23,7 +23,7 @@ export const tokenColors = (colors) => [
   },
   // Property names, as support.type.property-name.css
   {
-    scope: ["attribute.name.css", "attribute.name.scss"],
+    scope: ["attribute.name.css", "attribute.name.scss", "attribute.name.less"],
     settings: { foreground: colors.teal },
   },
   // Keys, as entity.name.tag.yaml: Monaco's YAML reports a key as `type`

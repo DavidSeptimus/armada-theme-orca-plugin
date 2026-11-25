@@ -242,7 +242,11 @@ function checkedTokens(name, appTokens) {
   );
   const failures = [];
   for (const token of Object.keys(tokens)) {
-    painted(tokens, token);
+    try {
+      painted(tokens, token);
+    } catch (error) {
+      throw new Error(`${name}: ${error.message}`);
+    }
   }
   for (const [text, surface, floor, beneath = []] of PAIRS) {
     if (![text, surface, ...beneath].every((token) => tokens[token])) {

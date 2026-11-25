@@ -130,9 +130,9 @@ This rebuilds everything under `screenshots/` from the plugin as it is in this f
 For each theme it starts a second copy of Orca whose window is never shown, on a throwaway
 profile with its own home folder, so the Orca you are working in is not touched and can stay open.
 It installs the themes there, without the pictures the manifest names, selects the theme, opens
-the files of `scripts/sample-project` one by one and saves a picture of each. The last one, `cover.png`, is the one for the listing:
-a file with a terminal below that prints git output and the 16 terminal colors, the same test the
-pictures of Orca's own themes use. After it comes `chat.png`, a chat with an agent. The agent is
+the files of `scripts/sample-project` one by one and saves a picture of each. Then come the diff and the terminal, and `cover.png`, the one for the
+listing: a file with a terminal below that prints git output and the 16 terminal colors, the same
+test the pictures of Orca's own themes use. After it comes `chat.png`, a chat with an agent. The agent is
 `scripts/fake-claude.mjs`, put on the second Orca's path under the name `claude`: it gives the
 same answer each time and needs no account. Last come two settings pages, `settings-appearance.png`
 and `settings-terminal.png`, for the cards and the controls on them. The second Orca, its profile
