@@ -1,12 +1,13 @@
 // Makes the cover of the plugin's page: Armada in front and above, Armada Light behind and below,
-// on Armada's navy. Run it after `npm run screenshots`, which takes the two pictures it uses.
+// on Armada's navy. `npm run screenshots` takes the two pictures it uses, and runs this at the
+// end when it has taken both themes.
 //
 //   npm run cover
 //
 // Needs ImageMagick 7 (`magick`). The cover is a WebP: the same picture as a PNG is over Orca's
 // limit of 1024 KB for a cover, because a gradient and soft shadows do not compress in a PNG.
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync, statSync } from "node:fs";
+import { copyFileSync, existsSync, mkdtempSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -26,13 +27,20 @@ const blue20 = "#111926";
 const blue60 = "#225090";
 const blue90 = "#0870E4";
 
-// Each window: its width, and where its top left corner goes. Armada Light is drawn first.
+// Each window: its width, and where the top left corner of its picture with the shadow around
+// it goes. The window itself is 80 to the right of that and 56 below. Armada Light is drawn first.
 const windowWidth = 2100;
 const light = { picture: join(screenshots, "light/cover.png"), x: 1000, y: 600 };
 const dark = { picture: join(screenshots, "cover.png"), x: 20, y: 30 };
 const cornerRadius = 28;
 
+for (const { picture } of [light, dark]) {
+  if (!existsSync(picture)) throw new Error(`${picture} is missing. Run npm run screenshots first.`);
+}
+
 const work = mkdtempSync(join(tmpdir(), "armada-cover-"));
+// Composed here first: a cover over the limit must not replace the one in the folder
+const composed = join(work, "cover-both.webp");
 const magick = (...args) => execFileSync("magick", args, { stdio: ["ignore", "ignore", "inherit"] });
 
 try {
@@ -74,14 +82,17 @@ try {
     windowOf(light, "light"), "-geometry", `+${light.x}+${light.y}`, "-compose", "over", "-composite",
     windowOf(dark, "dark"), "-geometry", `+${dark.x}+${dark.y}`, "-compose", "over", "-composite",
     "-quality", "90", "-define", "webp:method=6",
-    out,
+    composed,
   );
+
+  const bytes = statSync(composed).size;
+  if (bytes > COVER_MAX_BYTES) {
+    throw new Error(`The cover is ${Math.round(bytes / 1024)} KB, over Orca's ${COVER_MAX_BYTES / 1024} KB for one. ${out} is left as it was.`);
+  }
+  copyFileSync(composed, out);
 } finally {
   rmSync(work, { recursive: true, force: true });
 }
 
 const bytes = statSync(out).size;
-if (bytes > COVER_MAX_BYTES) {
-  throw new Error(`${out} is ${Math.round(bytes / 1024)} KB, over Orca's ${COVER_MAX_BYTES / 1024} KB for a cover`);
-}
 console.log(`screenshots/cover-both.webp: ${width}x${height}, ${Math.round(bytes / 1024)} KB`);

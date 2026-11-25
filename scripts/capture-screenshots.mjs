@@ -328,8 +328,8 @@ async function tabMenu(page, tabExpression, ...labels) {
   await page.sleep(800);
 }
 
-// One picture for the listing: a file with a terminal below. Orca's own themes add the file's
-// diff beside it.
+// The picture the listing's cover is made from (scripts/compose-cover.mjs): a file with a
+// terminal below. Orca's own themes add the file's diff beside it.
 async function shootCover(page) {
   await tabMenu(page, diffTab, "Close");
   await tabMenu(page, tabNamed("zsh"), "Move Tab to Split", "Down");
@@ -483,4 +483,12 @@ async function capture(variant) {
 
 for (const variant of variants) {
   await capture(variant);
+}
+
+// The cover of the plugin's page is made from both themes' cover.png, so it is stale as soon as
+// either is retaken
+if (variants.length === Object.keys(VARIANTS).length) {
+  execFileSync(process.execPath, [join(pluginDir, "scripts/compose-cover.mjs")], { stdio: "inherit" });
+} else {
+  console.log("One theme captured: run `npm run cover` to remake the cover of the plugin's page.");
 }

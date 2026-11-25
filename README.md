@@ -96,7 +96,7 @@ On `develop`, with everything else committed:
    npm run validate
    ```
 
-3. If the colors changed, run `npm run screenshots` and then `npm run cover`.
+3. If the colors changed, run `npm run screenshots`. It ends by making the cover.
 4. In `CHANGELOG.md`, put the notes under "Unreleased" under the new version and its date. The
    file ships with the release.
 5. Commit.
@@ -108,8 +108,9 @@ On `develop`, with everything else committed:
 
    It commits the shipped files to `main`, with `README.main.md` as their `README.md`, validates
    that commit with `orca plugin validate` and tags it `v<version>`. It does not push. The
-   pictures of settings pages (`screenshots/settings-*.png`, and the same under `light/`) stay on
-   `develop`: nothing on the plugin's page or in the release's readme shows them.
+   pictures of settings pages and the two the cover is made from (`screenshots/settings-*.png`
+   and `screenshots/cover.png`, and the same under `light/`) stay on `develop`: nothing on the
+   plugin's page or in the release's readme shows them.
 7. Push the two branches and the tag. The script prints the command:
 
    ```sh
@@ -126,15 +127,15 @@ every 30 minutes. The listing and its status are at
 npm run screenshots [-- dark|light]
 ```
 
-This rebuilds everything under `screenshots/` from the plugin as it is in this folder, so run
+This retakes the screenshots under `screenshots/` from the plugin as it is in this folder, so run
 `npm run build` first. Armada's pictures go to `screenshots/` and Armada Light's to
 `screenshots/light/`, under the same names; with `dark` or `light`, only that theme's are taken.
 For each theme it starts a second copy of Orca whose window is never shown, on a throwaway
 profile with its own home folder, so the Orca you are working in is not touched and can stay open.
 It installs the themes there, without the pictures the manifest names, selects the theme, opens
-the files of `scripts/sample-project` one by one and saves a picture of each. Then come the diff and the terminal, and `cover.png`, the one for the
-listing: a file with a terminal below that prints git output and the 16 terminal colors, the same
-test the pictures of Orca's own themes use. After it comes `chat.png`, a chat with an agent. The agent is
+the files of `scripts/sample-project` one by one and saves a picture of each. Then come the diff and the terminal, and `cover.png`, the
+picture the listing's cover is made from: a file with a terminal below that prints git output and
+the 16 terminal colors, the same test the pictures of Orca's own themes use. After it comes `chat.png`, a chat with an agent. The agent is
 `scripts/fake-claude.mjs`, put on the second Orca's path under the name `claude`: it gives the
 same answer each time and needs no account. Last come two settings pages, `settings-appearance.png`
 and `settings-terminal.png`, for the cards and the controls on them. The second Orca, its profile
@@ -151,7 +152,8 @@ npm run cover
 
 This makes `screenshots/cover-both.webp`, the cover of the plugin's page, from the two `cover.png`
 pictures: Armada in front and above, Armada Light behind and below, on a navy background of
-Armada's blues. It needs ImageMagick 7 (`magick`). Run it after `npm run screenshots`.
+Armada's blues. It needs ImageMagick 7 (`magick`). `npm run screenshots` runs it at the end when
+it has taken both themes; run it by hand after capturing one theme alone.
 
 The manifest names the cover and six screenshots, which is the most Orca takes: a chat, a Python
 file and a diff, each in both themes. A light picture carries `"theme": "light"` and a dark one

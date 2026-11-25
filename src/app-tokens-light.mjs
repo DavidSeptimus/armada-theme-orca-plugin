@@ -104,8 +104,9 @@ export const appTokens = (colors) => ({
   "--host-badge": colors.darkTint7,
   "--host-badge-foreground": colors.neutral60,
 
-  // The strip of tabs, part of the frame. The active tab is blueTint10 over
-  // it, Armada Light's active tab (#E0EAF7). Orca wants it opaque.
+  // The strip of tabs, part of the frame. The active tab is blueTint10, the
+  // tint of Armada Light's active tab, over it: #E0EAF7, a little lighter
+  // than that tab on Armada Light's own frame. Orca wants it opaque.
   "--tab-bar": colors.neutral160,
   "--tab-active": over(colors.blueTint10, colors.neutral160),
   "--tab-active-foreground": colors.neutral10,

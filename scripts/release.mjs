@@ -8,9 +8,10 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
 const SHIPPED = ['orca-plugin.json', 'themes', 'terminal', 'screenshots', 'LICENSE', 'CHANGELOG.md']
-// Pictures of settings pages, in either theme's folder. They are for comparing the two themes
-// while working on them; neither the plugin's page nor the release's readme shows them.
-const NOT_SHIPPED = /^screenshots\/(?:[^/]+\/)*settings-[^/]*\.png$/
+// Pictures that neither the plugin's page nor the release's readme shows, in either theme's
+// folder: the settings pages, which are for comparing the two themes while working on them, and
+// the two pictures the cover is made from.
+const NOT_SHIPPED = /^screenshots\/(?:[^/]+\/)*(?:settings-[^/]*|cover)\.png$/
 // The readme of the release branch is for people who use the theme. This branch's is about the build.
 const RELEASE_README = 'README.main.md'
 const SOURCE_BRANCH = 'develop'

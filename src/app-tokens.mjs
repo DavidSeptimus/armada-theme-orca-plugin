@@ -43,7 +43,7 @@ export const appTokens = (colors) => ({
   "--chart-4": colors.blue70,
   "--chart-5": colors.blue60,
 
-  // The right sidebar and the settings navigation
+  // The right sidebar
   "--sidebar": colors.neutral10,
   "--sidebar-foreground": colors.neutral140,
   "--sidebar-primary": colors.blue90,
