@@ -564,26 +564,36 @@ const TERMINAL = {
 
 // ----------------------------------------------------------------- output --
 
-// The pictures on the plugin's page, which scripts/capture-screenshots.mjs takes. Orca shows
-// its own drawing of the theme in place of a cover the manifest does not name, and takes at
-// most 6 screenshots.
-const shot = (name, alt, caption) => ({
-  path: `screenshots/${name}.png`,
-  alt,
-  ...(caption && { caption }),
-});
-const cover = shot(
-  "cover",
-  "Armada in Orca: a TypeScript file above a terminal showing git status and the 16 terminal colors",
-);
-const screenshots = [
-  shot("chat", "A chat with an agent in Orca with the Armada theme", "A chat"),
-  shot("light/cover", "Armada Light in Orca: a TypeScript file above a terminal", "Armada Light"),
-  shot("light/chat", "A chat with an agent in Orca with the Armada Light theme", "A chat, Armada Light"),
-  shot("python", "A Python file in Orca with the Armada theme", "Python"),
-  shot("diff", "A diff of a TypeScript file in Orca with the Armada theme", "A diff"),
-  shot("terminal", "Orca's terminal with the Armada terminal colors", "The terminal"),
+// The pictures on the plugin's page. scripts/capture-screenshots.mjs takes the screenshots and
+// scripts/compose-cover.mjs makes the cover from two of them. Orca shows its own drawing of the
+// theme in place of a cover the manifest does not name.
+//
+// Orca takes at most 6 screenshots, so these are 3 subjects, each in both themes. `theme` marks
+// a picture as for people whose Orca is light or dark. Orca 1.4.274 shows every picture whatever
+// its mode, so each dark picture is followed by its light one and the captions name the theme.
+const cover = {
+  path: "screenshots/cover-both.webp",
+  alt: "Armada and Armada Light in Orca: a TypeScript file above a terminal showing git status and the 16 terminal colors, in each theme",
+};
+const SUBJECTS = [
+  ["chat", "A chat with an agent", "A chat"],
+  ["python", "A Python file", "Python"],
+  ["diff", "A diff of a TypeScript file", "A diff"],
 ];
+const screenshots = SUBJECTS.flatMap(([name, what, caption]) => [
+  {
+    path: `screenshots/${name}.png`,
+    alt: `${what} in Orca with the Armada theme`,
+    caption: `${caption}, Armada`,
+    theme: "dark",
+  },
+  {
+    path: `screenshots/light/${name}.png`,
+    alt: `${what} in Orca with the Armada Light theme`,
+    caption: `${caption}, Armada Light`,
+    theme: "light",
+  },
+]);
 
 /**
  * Builds one theme. Returns its two files and its manifest entries. Nothing

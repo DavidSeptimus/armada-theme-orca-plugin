@@ -96,7 +96,7 @@ On `develop`, with everything else committed:
    npm run validate
    ```
 
-3. If the colors changed, run `npm run screenshots`.
+3. If the colors changed, run `npm run screenshots` and then `npm run cover`.
 4. In `CHANGELOG.md`, put the notes under "Unreleased" under the new version and its date. The
    file ships with the release.
 5. Commit.
@@ -142,6 +142,25 @@ and the copy of the sample project are removed at the end.
 
 macOS only. The switch that gives Orca a separate profile is the one its own end-to-end tests use.
 It is not a documented option, so an Orca update can break the script.
+
+### The plugin's page
+
+```sh
+npm run cover
+```
+
+This makes `screenshots/cover-both.webp`, the cover of the plugin's page, from the two `cover.png`
+pictures: Armada in front and above, Armada Light behind and below, on a navy background of
+Armada's blues. It needs ImageMagick 7 (`magick`). Run it after `npm run screenshots`.
+
+The manifest names the cover and six screenshots, which is the most Orca takes: a chat, a Python
+file and a diff, each in both themes. A light picture carries `"theme": "light"` and a dark one
+`"theme": "dark"`, Orca's mark for a picture that is for people in that mode. Orca 1.4.274 shows
+all six whatever its mode, so each dark picture is followed by its light one and the caption names
+the theme. `README.main.md` shows every subject in both themes.
+
+Orca's limits: a cover of at least 800×500 and at most 1024 KB, a screenshot of at least 1280×800
+and at most 1536 KB, 16:10 for both, and 8 MB for all pictures together.
 
 ## License
 

@@ -12,39 +12,45 @@
     "orca": ">=1.4.245"
   },
   "cover": {
-    "path": "screenshots/cover.png",
-    "alt": "Armada in Orca: a TypeScript file above a terminal showing git status and the 16 terminal colors"
+    "path": "screenshots/cover-both.webp",
+    "alt": "Armada and Armada Light in Orca: a TypeScript file above a terminal showing git status and the 16 terminal colors, in each theme"
   },
   "screenshots": [
     {
       "path": "screenshots/chat.png",
       "alt": "A chat with an agent in Orca with the Armada theme",
-      "caption": "A chat"
-    },
-    {
-      "path": "screenshots/light/cover.png",
-      "alt": "Armada Light in Orca: a TypeScript file above a terminal",
-      "caption": "Armada Light"
+      "caption": "A chat, Armada",
+      "theme": "dark"
     },
     {
       "path": "screenshots/light/chat.png",
       "alt": "A chat with an agent in Orca with the Armada Light theme",
-      "caption": "A chat, Armada Light"
+      "caption": "A chat, Armada Light",
+      "theme": "light"
     },
     {
       "path": "screenshots/python.png",
       "alt": "A Python file in Orca with the Armada theme",
-      "caption": "Python"
+      "caption": "Python, Armada",
+      "theme": "dark"
+    },
+    {
+      "path": "screenshots/light/python.png",
+      "alt": "A Python file in Orca with the Armada Light theme",
+      "caption": "Python, Armada Light",
+      "theme": "light"
     },
     {
       "path": "screenshots/diff.png",
       "alt": "A diff of a TypeScript file in Orca with the Armada theme",
-      "caption": "A diff"
+      "caption": "A diff, Armada",
+      "theme": "dark"
     },
     {
-      "path": "screenshots/terminal.png",
-      "alt": "Orca's terminal with the Armada terminal colors",
-      "caption": "The terminal"
+      "path": "screenshots/light/diff.png",
+      "alt": "A diff of a TypeScript file in Orca with the Armada Light theme",
+      "caption": "A diff, Armada Light",
+      "theme": "light"
     }
   ],
   "contributes": {

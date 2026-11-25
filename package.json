@@ -17,6 +17,7 @@
     "build": "node --experimental-strip-types scripts/build-theme.mjs",
     "validate": "orca plugin validate .",
     "screenshots": "node scripts/capture-screenshots.mjs",
+    "cover": "node scripts/compose-cover.mjs",
     "dev": "node scripts/dev.mjs",
     "release": "node scripts/release.mjs"
   }
