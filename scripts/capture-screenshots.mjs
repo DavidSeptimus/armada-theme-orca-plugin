@@ -257,6 +257,9 @@ const hideCursorMarks = `(() => {
     "{ visibility: hidden !important; }",
     ".monaco-editor .line-numbers.active-line-number { color: " + lineNumber + " !important; }",
     ".ProseMirror { caret-color: transparent !important; }",
+    // Orca's notices in the corner of the window: an update that is ready, a tip. They depend on
+    // the day the pictures are taken, not on the theme.
+    ".notification-card-stack, [data-sonner-toaster] { display: none !important; }",
   ].join(" ");
   document.head.append(style);
 })()`;

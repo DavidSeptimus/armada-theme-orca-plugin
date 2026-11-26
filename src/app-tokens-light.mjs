@@ -14,9 +14,10 @@
 // and the strip of tabs are one color and the editor another.
 //
 // A hovered or selected row is a gray a step or two darker than what it is
-// on. The current workspace is blue, as in the dark theme, and so is the
-// active tab; the active tab and the active tool of the right sidebar have a
-// blue line under them. The selection is blue130 (#A8C6F4), the IntelliJ
+// on, except the rows Orca paints with --sidebar-accent, which are blue. The
+// current workspace is blue, as in the dark theme, and so is the active tab;
+// the active tab and the active tool of the right sidebar have a blue line
+// under them. The selection is blue130 (#A8C6F4), the IntelliJ
 // theme's.
 //
 // Orca drops a text and surface pair under its contrast floor and paints its
@@ -77,10 +78,20 @@ export const appTokens = (colors) => ({
   "--sidebar-foreground": colors.neutral10,
   "--sidebar-primary": colors.blue90,
   "--sidebar-primary-foreground": colors.white,
-  "--sidebar-accent": colors.neutral140,
+  // The agent that has the focus, inside the current workspace's row. Also,
+  // in the left sidebar, a selected or hovered bot chat and a workspace that
+  // is being made; in the right sidebar's Agents panel, its switch, a hovered
+  // row and a search hit. The blue of the current workspace and the active
+  // tab, so the agent's row is a darker blue on its workspace: Orca mixes 12%
+  // of the text color into this for it. In the dark theme that row is the
+  // hover gray at 70% with the workspace's blue showing through, a recipe
+  // Orca has for dark themes only. Orca wants this opaque.
+  "--sidebar-accent": over(colors.blueTint10, colors.neutral160),
   "--sidebar-accent-foreground": colors.neutral10,
-  // Quiet: the sidebar's fill sets it off from the white center
-  "--sidebar-border": colors.neutral150,
+  // The right sidebar's edge, the color of the left sidebar's. In the top row
+  // both sides of this line are the frame's color, and a lighter line is lost
+  // there.
+  "--sidebar-border": colors.neutral140,
   "--sidebar-ring": colors.blue90,
 
   // The left workspace sidebar, the strip of icons beside it and the settings
