@@ -5,7 +5,11 @@
 // the one Orca's own end-to-end tests use. It is not a documented option, so an Orca update may
 // break this script; nothing else in the plugin depends on it.
 //
-//   npm run screenshots
+//   npm run screenshots [-- dark|light]
+//
+// Armada's pictures go to screenshots/ and Armada Light's to screenshots/light/, under the same
+// names. Each theme gets a second Orca of its own, started from an empty profile, so the two sets
+// show the same window. With a name, only that theme is captured.
 //
 // macOS only. Needs Orca installed, and git.
 import { spawn, execFileSync } from "node:child_process";
@@ -17,7 +21,7 @@ import { fileURLToPath } from "node:url";
 import { connect } from "./cdp.mjs";
 
 const pluginDir = dirname(dirname(fileURLToPath(import.meta.url)));
-const outDir = join(pluginDir, "screenshots");
+const screenshotsDir = join(pluginDir, "screenshots");
 
 const appDir = process.env.ORCA_APP ?? "/Applications/Orca.app";
 const appBinary = join(appDir, "Contents/MacOS/Orca");
@@ -39,8 +43,27 @@ const scale = 2;
 
 const manifest = JSON.parse(await readFile(join(pluginDir, "orca-plugin.json"), "utf8"));
 const pluginKey = `${manifest.publisher}.${manifest.id}`;
-const themeId = `plugin:${pluginKey}/${manifest.contributes.themes[0].id}`;
-const terminalThemeId = `plugin:${pluginKey}/${manifest.contributes.terminalThemes[0].id}`;
+// Orca has a slot for a light theme and one for a dark theme, and paints the one for its mode
+const VARIANTS = {
+  dark: { id: "armada-dark", outDir: screenshotsDir, slot: "Dark" },
+  light: { id: "armada-light", outDir: join(screenshotsDir, "light"), slot: "Light" },
+};
+const requested = [...new Set(process.argv.slice(2))];
+for (const name of requested) {
+  if (!Object.hasOwn(VARIANTS, name)) throw new Error(`No theme named ${name}. Name dark or light, or neither for both.`);
+}
+// CAPTURE_KEEP leaves the second Orca up after a theme, so there is no starting one for the next
+if (process.env.CAPTURE_KEEP && requested.length !== 1) {
+  throw new Error("CAPTURE_KEEP keeps one theme's Orca up. Name dark or light.");
+}
+const variants = (requested.length > 0 ? requested : Object.keys(VARIANTS)).map((name) => ({ name, ...VARIANTS[name] }));
+for (const { id } of variants) {
+  for (const kind of ["themes", "terminalThemes"]) {
+    if (!manifest.contributes[kind].some((theme) => theme.id === id)) {
+      throw new Error(`orca-plugin.json has no ${id} under ${kind}. Run npm run build first.`);
+    }
+  }
+}
 
 // Nothing of the caller's environment reaches the second Orca: run from an Orca terminal, this
 // process carries variables that point at the Orca it runs in
@@ -176,11 +199,12 @@ const elementWithText = (text) =>
     .filter((element) => element.children.length === 0 || element.tagName === "BUTTON")
     .find((element) => element.innerText?.trim() === ${JSON.stringify(text)})`;
 
-async function prepareWindow(page) {
+async function prepareWindow(page, variant) {
+  const themeId = `plugin:${pluginKey}/${variant.id}`;
   await page.evaluate(`window.api.settings.set(${JSON.stringify({
-    theme: "dark",
-    pluginAppThemeDark: themeId,
-    terminalThemeDark: terminalThemeId,
+    theme: variant.name,
+    [`pluginAppTheme${variant.slot}`]: themeId,
+    [`terminalTheme${variant.slot}`]: themeId,
   })})`);
   // The welcome flow, which a new profile opens over the window
   await page.evaluate(
@@ -233,9 +257,15 @@ const hideCursorMarks = `(() => {
     "{ visibility: hidden !important; }",
     ".monaco-editor .line-numbers.active-line-number { color: " + lineNumber + " !important; }",
     ".ProseMirror { caret-color: transparent !important; }",
+    // Orca's notices in the corner of the window: an update that is ready, a tip. They depend on
+    // the day the pictures are taken, not on the theme.
+    ".notification-card-stack, [data-sonner-toaster] { display: none !important; }",
   ].join(" ");
   document.head.append(style);
 })()`;
+
+// Where the pictures of the theme being captured go
+let outDir;
 
 async function shoot(page, name) {
   await page.evaluate(hideCursorMarks);
@@ -301,8 +331,8 @@ async function tabMenu(page, tabExpression, ...labels) {
   await page.sleep(800);
 }
 
-// One picture for the listing: a file with a terminal below. Orca's own themes add the file's
-// diff beside it.
+// The picture the listing's cover is made from (scripts/compose-cover.mjs): a file with a
+// terminal below. Orca's own themes add the file's diff beside it.
 async function shootCover(page) {
   await tabMenu(page, diffTab, "Close");
   await tabMenu(page, tabNamed("zsh"), "Move Tab to Split", "Down");
@@ -327,6 +357,20 @@ function machineNames() {
     // No such name set
   }
   return names;
+}
+
+// What the second Orca installs: the themes without the pictures. The manifest names pictures
+// this script has yet to take, and Orca refuses a plugin that names a file it lacks.
+const stagedPlugin = join(workDir, "plugin");
+
+async function stagePlugin() {
+  await rm(stagedPlugin, { recursive: true, force: true });
+  await mkdir(stagedPlugin, { recursive: true });
+  const { cover, screenshots, ...rest } = manifest;
+  await writeFile(join(stagedPlugin, "orca-plugin.json"), JSON.stringify(rest, null, 2));
+  for (const folder of ["themes", "terminal"]) {
+    await cp(join(pluginDir, folder), join(stagedPlugin, folder), { recursive: true });
+  }
 }
 
 async function installFakeClaude() {
@@ -358,45 +402,96 @@ async function shootChat(page) {
   await shoot(page, "chat");
 }
 
+// Settings pages: cards, selects, steppers, switches and sliders. Two whose first screen shows no
+// path under the profile's folder.
+const settingsPages = [
+  ["settings-appearance", "Appearance"],
+  ["settings-terminal", "Terminal"],
+];
+
+const settingsItem = (label) =>
+  `[...document.querySelectorAll("button")].find((element) => element.innerText.trim() === ${JSON.stringify(label)})`;
+
+async function shootSettings(page) {
+  await page.clickOn(`document.querySelector("[data-app-rail-item=settings]")`, "the Settings button");
+  for (const [name, label] of settingsPages) {
+    // The navigation scrolls to the item with an animation, so a click by position can land on
+    // the item that was there before
+    await page.waitFor(`!!(${settingsItem(label)})`, label);
+    await page.evaluate(`(${settingsItem(label)}).click()`);
+    // The page is named in the path above it
+    await page.waitFor(
+      `[...document.querySelectorAll("nav")].some((nav) => nav.innerText.replace(/\\s+/g, " ").trim() === ${JSON.stringify(`Settings / ${label}`)})`,
+      `the ${label} page`,
+    );
+    await shoot(page, name);
+  }
+}
+
 if (process.platform !== "darwin") throw new Error("This script drives the macOS build of Orca");
 if (!existsSync(appBinary)) throw new Error(`Orca is not at ${appDir}. Set ORCA_APP to its path.`);
 
 await mkdir(workDir, { recursive: true });
-await mkdir(outDir, { recursive: true });
-await makeSampleProject();
 await installFakeClaude();
+await stagePlugin();
 
-let page;
-try {
-  console.log("Starting a second, hidden Orca");
-  page = await launchOrca();
-  orca("plugin", "install", pluginDir);
-  orca("repo", "add", "--path", projectDir);
-  page = await prepareWindow(page);
+async function capture(variant) {
+  outDir = variant.outDir;
+  await mkdir(outDir, { recursive: true });
+  await makeSampleProject();
 
-  console.log(`Capturing to ${outDir}`);
-  await shootFile(page, "typescript", "src/schedule.ts");
-  await shootFile(page, "html", "src/index.html");
-  await shootFile(page, "css", "src/styles.css");
-  await shootFile(page, "json", "package.json");
-  await shootFile(page, "python", "scripts/tides.py");
-  await shootFile(page, "markdown", "README.md");
+  let page;
+  try {
+    console.log(`${variant.name}: starting a second, hidden Orca`);
+    page = await launchOrca();
+    orca("plugin", "install", stagedPlugin);
+    orca("repo", "add", "--path", projectDir);
+    page = await prepareWindow(page, variant);
 
-  orca("file", "diff", "src/schedule.ts", "--worktree", worktree, "--focus");
-  await page.sleep(1500);
-  await shoot(page, "diff");
+    console.log(`Capturing to ${outDir}`);
+    await shootFile(page, "typescript", "src/schedule.ts");
+    await shootFile(page, "html", "src/index.html");
+    await shootFile(page, "css", "src/styles.css");
+    await shootFile(page, "json", "package.json");
+    await shootFile(page, "python", "scripts/tides.py");
+    await shootFile(page, "markdown", "README.md");
 
-  await writeFile(join(workDir, "terminal-demo.sh"), terminalDemo);
-  openTerminal();
-  await page.sleep(4000);
-  await shoot(page, "terminal");
-  await shootCover(page);
-  await shootChat(page);
-} finally {
-  page?.close();
-  // For working on this script: leaves the second Orca up to poke at over the debugging port
-  if (process.env.CAPTURE_KEEP) process.exit(0);
-  await stopOrca();
-  await rm(projectDir, { recursive: true, force: true });
-  await rm(profileDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 400 });
+    orca("file", "diff", "src/schedule.ts", "--worktree", worktree, "--focus");
+    await page.sleep(1500);
+    await shoot(page, "diff");
+
+    await writeFile(join(workDir, "terminal-demo.sh"), terminalDemo);
+    openTerminal();
+    await page.sleep(4000);
+    await shoot(page, "terminal");
+    await shootCover(page);
+    await shootChat(page);
+    await shootSettings(page);
+  } catch (error) {
+    // CAPTURE_KEEP exits below, before the error would be printed
+    if (process.env.CAPTURE_KEEP) {
+      console.error(error);
+      process.exitCode = 1;
+    }
+    throw error;
+  } finally {
+    page?.close();
+    // For working on this script: leaves the second Orca up to poke at over the debugging port
+    if (process.env.CAPTURE_KEEP) process.exit(process.exitCode ?? 0);
+    await stopOrca();
+    await rm(projectDir, { recursive: true, force: true });
+    await rm(profileDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 400 });
+  }
+}
+
+for (const variant of variants) {
+  await capture(variant);
+}
+
+// The cover of the plugin's page is made from both themes' cover.png, so it is stale as soon as
+// either is retaken
+if (variants.length === Object.keys(VARIANTS).length) {
+  execFileSync(process.execPath, [join(pluginDir, "scripts/compose-cover.mjs")], { stdio: "inherit" });
+} else {
+  console.log("One theme captured: run `npm run cover` to remake the cover of the plugin's page.");
 }

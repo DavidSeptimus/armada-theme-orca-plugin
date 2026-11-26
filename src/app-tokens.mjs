@@ -27,8 +27,9 @@ export const appTokens = (colors) => ({
   "--secondary-foreground": colors.neutral140,
   "--muted": colors.neutral30,
   "--muted-foreground": colors.neutral120,
-  // Orca's one fill for hovered buttons and rows and for the highlighted item
-  // of a menu. Gray, as hover is in Armada: a blue here also fills buttons.
+  // Orca's fill for hovered buttons and rows, for the chosen segment of a
+  // switch and for the band on the editor's current line. Gray, as hover is
+  // in Armada: a blue here also fills buttons.
   "--accent": colors.neutral40,
   "--accent-foreground": colors.neutral140,
   "--border": colors.neutral30,
@@ -43,7 +44,7 @@ export const appTokens = (colors) => ({
   "--chart-4": colors.blue70,
   "--chart-5": colors.blue60,
 
-  // The right sidebar and the settings navigation
+  // The right sidebar
   "--sidebar": colors.neutral10,
   "--sidebar-foreground": colors.neutral140,
   "--sidebar-primary": colors.blue90,

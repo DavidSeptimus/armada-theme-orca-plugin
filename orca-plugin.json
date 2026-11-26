@@ -5,46 +5,52 @@
   "name": "Armada for Orca",
   "version": "1.1.1",
   "execution": "data",
-  "description": "A dark color theme inspired by the dark themes of JetBrains Fleet and Air.",
+  "description": "Dark and light color themes inspired by the themes of JetBrains Fleet and Air.",
   "license": "MIT",
   "repository": "https://github.com/DavidSeptimus/armada-theme-orca-plugin",
   "engines": {
     "orca": ">=1.4.245"
   },
   "cover": {
-    "path": "screenshots/cover.png",
-    "alt": "Armada in Orca: a TypeScript file above a terminal showing git status and the 16 terminal colors"
+    "path": "screenshots/cover-both.webp",
+    "alt": "Armada and Armada Light in Orca: a TypeScript file above a terminal showing git status and the 16 terminal colors, in each theme"
   },
   "screenshots": [
     {
       "path": "screenshots/chat.png",
       "alt": "A chat with an agent in Orca with the Armada theme",
-      "caption": "A chat"
+      "caption": "A chat, Armada",
+      "theme": "dark"
+    },
+    {
+      "path": "screenshots/light/chat.png",
+      "alt": "A chat with an agent in Orca with the Armada Light theme",
+      "caption": "A chat, Armada Light",
+      "theme": "light"
     },
     {
       "path": "screenshots/python.png",
       "alt": "A Python file in Orca with the Armada theme",
-      "caption": "Python"
+      "caption": "Python, Armada",
+      "theme": "dark"
     },
     {
-      "path": "screenshots/css.png",
-      "alt": "A CSS file in Orca with the Armada theme",
-      "caption": "CSS"
-    },
-    {
-      "path": "screenshots/markdown.png",
-      "alt": "A Markdown file in Orca with the Armada theme",
-      "caption": "Markdown"
+      "path": "screenshots/light/python.png",
+      "alt": "A Python file in Orca with the Armada Light theme",
+      "caption": "Python, Armada Light",
+      "theme": "light"
     },
     {
       "path": "screenshots/diff.png",
       "alt": "A diff of a TypeScript file in Orca with the Armada theme",
-      "caption": "A diff"
+      "caption": "A diff, Armada",
+      "theme": "dark"
     },
     {
-      "path": "screenshots/terminal.png",
-      "alt": "Orca's terminal with the Armada terminal colors",
-      "caption": "The terminal"
+      "path": "screenshots/light/diff.png",
+      "alt": "A diff of a TypeScript file in Orca with the Armada Light theme",
+      "caption": "A diff, Armada Light",
+      "theme": "light"
     }
   ],
   "contributes": {
@@ -53,6 +59,11 @@
         "id": "armada-dark",
         "title": "Armada",
         "path": "themes/armada.json"
+      },
+      {
+        "id": "armada-light",
+        "title": "Armada Light",
+        "path": "themes/armada-light.json"
       }
     ],
     "terminalThemes": [
@@ -60,6 +71,11 @@
         "id": "armada-dark",
         "title": "Armada",
         "path": "terminal/armada.json"
+      },
+      {
+        "id": "armada-light",
+        "title": "Armada Light",
+        "path": "terminal/armada-light.json"
       }
     ]
   },

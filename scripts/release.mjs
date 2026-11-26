@@ -8,6 +8,10 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
 const SHIPPED = ['orca-plugin.json', 'themes', 'terminal', 'screenshots', 'LICENSE', 'CHANGELOG.md']
+// Pictures that neither the plugin's page nor the release's readme shows, in either theme's
+// folder: the settings pages, which are for comparing the two themes while working on them, and
+// the two pictures the cover is made from.
+const NOT_SHIPPED = /^screenshots\/(?:[^/]+\/)*(?:settings-[^/]*|cover)\.png$/
 // The readme of the release branch is for people who use the theme. This branch's is about the build.
 const RELEASE_README = 'README.main.md'
 const SOURCE_BRANCH = 'develop'
@@ -35,7 +39,21 @@ try {
   const env = { ...process.env, GIT_INDEX_FILE: join(work, 'index') }
   const readme = git(['ls-tree', 'HEAD', '--', RELEASE_README]).replace(RELEASE_README, 'README.md')
   if (!readme) fail(`${RELEASE_README} is missing.`)
-  const entries = `${git(['ls-tree', '-r', 'HEAD', '--', ...SHIPPED])}\n${readme}`
+  // A line of ls-tree is `<mode> <type> <object>\t<path>`
+  const shipped = git(['ls-tree', '-r', 'HEAD', '--', ...SHIPPED])
+    .split('\n')
+    .filter((line) => !NOT_SHIPPED.test(line.slice(line.indexOf('\t') + 1)))
+    .join('\n')
+  // A picture the plugin's page or the release's readme shows must be in the release
+  const manifest = JSON.parse(readFileSync('orca-plugin.json', 'utf8'))
+  const shown = [
+    manifest.cover?.path,
+    ...(manifest.screenshots ?? []).map((picture) => picture.path),
+    ...[...readFileSync(RELEASE_README, 'utf8').matchAll(/\]\((screenshots\/[^)\s]+)\)/g)].map((link) => link[1]),
+  ].filter(Boolean)
+  const missing = shown.filter((path) => !shipped.split('\n').some((line) => line.endsWith(`\t${path}`)))
+  if (missing.length > 0) fail(`The release would lack pictures that are shown: ${missing.join(', ')}`)
+  const entries = `${shipped}\n${readme}`
   git(['update-index', '--add', '--index-info'], { env, input: `${entries}\n` })
   const tree = git(['write-tree'], { env })
 
