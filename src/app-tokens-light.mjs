@@ -13,9 +13,11 @@
 // with white sidebars its window is flat. As in the dark theme, the sidebars
 // and the strip of tabs are one color and the editor another.
 //
-// A hovered or selected row is a gray two steps darker than the frame
-// (three on white), except the rows Orca paints with --sidebar-accent, which
-// are blue. The
+// A selected row is a gray two steps darker than the frame. A hovered row or
+// button is a step darker (--accent, which is also the band on the editor's
+// current line and so is counted from white), except in the left sidebar,
+// where Orca hovers a row with the selection's gray, in part or whole. The
+// rows Orca paints with --sidebar-accent are blue, hovered or selected. The
 // current workspace is blue, as in the dark theme, and so is the active tab;
 // the active tab and the active tool of the right sidebar have a blue line
 // under them. The selection is blue130 (#A8C6F4), the IntelliJ
@@ -56,11 +58,12 @@ export const appTokens = (colors) => ({
   "--muted-foreground": colors.neutral80,
   // Orca's fill for hovered buttons and rows and for the chosen segment of a
   // switch, and the band on the editor's current line. Gray, as hover is in
-  // Armada: a blue here also fills buttons. Two steps from the frame, where
-  // most hovers are, as the dark theme's hover is two steps from its editor;
-  // that is three steps from white, so the current line's band is a step
-  // stronger than the dark theme's. A step darker than a quiet fill.
-  "--accent": colors.neutral140,
+  // Armada: a blue here also fills buttons. Two steps from white, for the
+  // current line's band, as the dark theme's hover is two steps from its
+  // editor. That leaves a hover on the frame one step from it, and the same
+  // gray as a quiet fill: neutral140 would put it at two, and the band at
+  // three.
+  "--accent": colors.neutral150,
   "--accent-foreground": colors.neutral10,
   // The outline of a card: Orca paints a settings card at half of --card,
   // which is #FBFBFC on the white page, so the outline is what shows it
@@ -91,7 +94,7 @@ export const appTokens = (colors) => ({
   // of the text color into this for it. In the dark theme that row is the
   // hover gray at 70% with the workspace's blue showing through, a recipe
   // Orca has for dark themes only. Orca wants this opaque.
-  "--sidebar-accent": over(colors.blueTint10, colors.neutral160),
+  "--sidebar-accent": over(colors.blueTint15, colors.neutral160),
   "--sidebar-accent-foreground": colors.neutral10,
   // The right sidebar's edge, the color of the left sidebar's. In the top row
   // both sides of this line are the frame's color, and a lighter line is lost
@@ -113,18 +116,20 @@ export const appTokens = (colors) => ({
   // workspace sidebar take it too.
   "--worktree-sidebar-ring": colors.neutral10,
   // The current workspace: a blue tint with a blue border, as in the dark
-  // theme, and the tint of Armada Light's active tab
-  "--worktree-sidebar-active": colors.blueTint10,
+  // theme. blueTint15 is about as strong on the frame (1.22:1) as the dark
+  // theme's blueTint25 is on its shell (1.26:1); blueTint10, the tint of
+  // Armada Light's own active tab, is 1.14:1 here.
+  "--worktree-sidebar-active": colors.blueTint15,
   "--worktree-sidebar-active-border": colors.blueTint50,
   // On every workspace row, so it stays quiet
   "--host-badge": colors.darkTint7,
   "--host-badge-foreground": colors.neutral60,
 
-  // The strip of tabs, part of the frame. The active tab is blueTint10, the
-  // tint of Armada Light's active tab, over it: #E0EAF7, a little lighter
-  // than that tab on Armada Light's own frame. Orca wants it opaque.
+  // The strip of tabs, part of the frame. The active tab is the current
+  // workspace's blue, blueTint15 over the frame: #D4E4F6. Orca wants it
+  // opaque.
   "--tab-bar": colors.neutral160,
-  "--tab-active": over(colors.blueTint10, colors.neutral160),
+  "--tab-active": over(colors.blueTint15, colors.neutral160),
   "--tab-active-foreground": colors.neutral10,
   // Armada's accent, solid: Armada Light's own line, blueTint50, is under
   // 2:1 on the tab, and Orca then paints the tab's text color. The same line
