@@ -13,8 +13,9 @@
 // with white sidebars its window is flat. As in the dark theme, the sidebars
 // and the strip of tabs are one color and the editor another.
 //
-// A hovered or selected row is a gray a step or two darker than what it is
-// on, except the rows Orca paints with --sidebar-accent, which are blue. The
+// A hovered or selected row is a gray two steps darker than the frame
+// (three on white), except the rows Orca paints with --sidebar-accent, which
+// are blue. The
 // current workspace is blue, as in the dark theme, and so is the active tab;
 // the active tab and the active tool of the right sidebar have a blue line
 // under them. The selection is blue130 (#A8C6F4), the IntelliJ
@@ -53,9 +54,13 @@ export const appTokens = (colors) => ({
   // A step darker than the sidebars, so a quiet fill shows on them
   "--muted": colors.neutral150,
   "--muted-foreground": colors.neutral80,
-  // Orca's one fill for hovered buttons and rows and for the highlighted item
-  // of a menu. Gray, as hover is in Armada: a blue here also fills buttons.
-  "--accent": colors.neutral150,
+  // Orca's fill for hovered buttons and rows and for the chosen segment of a
+  // switch, and the band on the editor's current line. Gray, as hover is in
+  // Armada: a blue here also fills buttons. Two steps from the frame, where
+  // most hovers are, as the dark theme's hover is two steps from its editor;
+  // that is three steps from white, so the current line's band is a step
+  // stronger than the dark theme's. A step darker than a quiet fill.
+  "--accent": colors.neutral140,
   "--accent-foreground": colors.neutral10,
   // The outline of a card: Orca paints a settings card at half of --card,
   // which is #FBFBFC on the white page, so the outline is what shows it
